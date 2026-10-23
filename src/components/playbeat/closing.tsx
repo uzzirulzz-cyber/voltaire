@@ -3,6 +3,21 @@
 import { motion } from "framer-motion";
 import { Play } from "lucide-react";
 
+/**
+ * Closing — VOLTAIRE ticker rail + the final CTA band.
+ * Ticker pauses on hover; disabled under reduced motion.
+ */
+
+const TICKER = [
+  "VOLTAIRE — full regeneration",
+  "people playing with the beat",
+  "playbeat digital",
+  "lifestyle atlas",
+  "late-night studio sessions",
+  "neon rooftop frequency",
+  "your next big idea",
+];
+
 const reveal = {
   hidden: { opacity: 0, y: 24 },
   show: {
@@ -13,56 +28,50 @@ const reveal = {
 };
 
 export function Closing() {
+  const items = [...TICKER, ...TICKER];
   return (
     <>
-      {/* quote band */}
+      {/* VOLTAIRE ticker rail */}
       <section
-        aria-label="Manifesto"
-        className="relative z-10 px-4 py-14 sm:px-6 sm:py-20"
+        aria-label="PlayBeat network ticker"
+        className="relative z-10 overflow-hidden border-y border-white/12 py-3.5"
       >
-        <motion.blockquote
-          variants={reveal}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-80px" }}
-          className="mx-auto max-w-3xl text-center"
-        >
-          <p className="font-display text-xl font-semibold leading-relaxed text-silver-lt sm:text-2xl">
-            “A quiet space to think bigger.
-            <br />
-            A capable partner to go further.”
-          </p>
-          <cite className="mt-4 block text-xs not-italic tracking-wide text-gold-lt">
-            — the idea behind PlayBeat AI
-          </cite>
-        </motion.blockquote>
+        <div className="group flex w-max animate-[pb-marquee_28s_linear_infinite] items-center gap-10 [animation-play-state:running] hover:[animation-play-state:paused]">
+          {items.map((t, i) => (
+            <span
+              key={`${t}-${i}`}
+              className="flex items-center gap-2.5 text-[12px] whitespace-nowrap text-dim"
+            >
+              <span aria-hidden="true" className="h-[5px] w-[5px] rounded-full bg-acc3" />
+              {t}
+            </span>
+          ))}
+        </div>
       </section>
 
       {/* CTA band */}
-      <section className="relative z-10 px-4 pb-20 sm:px-6">
+      <section className="relative z-10 px-4 py-20 sm:px-6">
         <motion.div
           variants={reveal}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-60px" }}
-          className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl border border-gold/30 bg-gradient-to-br from-navy-mid via-navy-soft/70 to-navy-mid px-6 py-12 text-center shadow-[0_40px_90px_rgba(0,0,0,0.45)] sm:py-16"
+          className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-acc1/30 bg-gradient-to-br from-panel via-white/4 to-panel px-6 py-12 text-center [box-shadow:0_40px_90px_rgba(0,0,0,0.45),0_0_60px_rgba(167,139,250,0.12)] sm:py-14"
         >
-          {/* inner glow + dots */}
+          <div aria-hidden="true" className="pb-dots pointer-events-none absolute inset-0 opacity-50" />
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gold opacity-20 blur-[90px]"
+            className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-acc2/20 blur-[90px]"
           />
-          <div aria-hidden="true" className="pb-dots pointer-events-none absolute inset-0 opacity-40" />
-
-          <h2 className="relative font-display text-2xl font-bold text-silver-lt sm:text-3xl">
-            Ready to think bigger?
+          <h2 className="relative font-display text-2xl font-bold tracking-[-0.01em] text-ink sm:text-3xl">
+            Ready to <span className="grad-text">groove</span>?
           </h2>
-          <p className="relative mt-2.5 text-sm text-silver/65">
+          <p className="relative mt-2.5 text-sm text-dim">
             A little curiosity. Endless possibility.
           </p>
           <a
             href="#studio"
-            className="pb-gold-btn relative mt-7 inline-flex items-center gap-2 rounded-xl px-7 py-3.5 font-display text-sm font-bold"
+            className="pb-grad-btn sheen relative mt-7 inline-flex items-center gap-2 rounded-2xl px-7 py-3.5 font-display text-sm font-bold"
           >
             <Play className="h-4 w-4" fill="currentColor" />
             Start your first conversation

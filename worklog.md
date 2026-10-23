@@ -138,3 +138,140 @@ Stage Summary:
 - curl results (all pass): signup 201 {user:{id,name,email,createdAt}}; duplicate → 409 friendly error; short pw → 400; bad email → 400; me with jar → 200 user, without → 401; GET conversations with jar → 200 {conversations:[]} then listed created ones, without jar → 401; POST /api/chat without jar → 401; WITH jar (legacy uid field sent + ignored) → 200 real-LLM reply "Let's ignite the creative spark and turn your vision into a standing ovation." (conv auto-created, uid = session user id, messageCount 2); follow-up in same conv → 200, messageCount 4, history-aware reply; messages endpoint → 200 user+assistant pair; second account signup → cross-account GET conversation / GET messages / POST chat into first account's conversation → all 404; DELETE own conversation → {ok:true}, GET after → 404; logout → {ok:true}, me after → 401; login wrong password / unknown email → 401 "Wrong email or password."; login correct (mixed-case email) → 200 + fresh cookie; tampered-signature cookie → 401; /api/health → { ok, project, database:"connected", ai:"live", auth:"live", model, time }.
 - Cleanup confirmed: 2 test users + 2 test conversations (4 messages) deleted; users=0; only the main agent's pre-existing frontend-test conversation remains.
 - Deviations: (1) added src/app/api/auth/_lib/session.ts shared helper (within allowed src/app/api/auth/**); (2) temporary next.config.ts comment to force the dev server's built-in config-reload because Turbopack held a stale Prisma client after `prisma generate` (file restored byte-identical; singleton-reset + db.ts-nudge attempts alone were insufficient — documented above); (3) verifyPassword uses the salt hex STRING (not decoded bytes) so scrypt derivation matches hashPassword exactly.
+
+---
+Task ID: 12
+Agent: main (Z.ai Code)
+Task: Assets — VOLTAIRE film + poster, favicon retheme
+
+Work Log:
+- Copied upload/"VOLTAIRE — People Playing With The Beat.mp4" → public/media/voltaire-beat.mp4 (1.7MB, 38s, 1552×832 h264+aac).
+- ffmpeg-extracted poster frame at 1.6s → public/media/voltaire-poster.jpg (104KB).
+- favicon.svg: EQ-bars mark in violet→pink gradient on #0a0a12.
+
+Stage Summary:
+- Film ready for the hero collage; poster prevents any flash before playback.
+
+---
+Task ID: 13
+Agent: main (Z.ai Code)
+Task: Core retheme — globals.css + layout fonts
+
+Work Log:
+- globals.css rewritten to the vivid reference palette: void #0a0a12 / panel / ink / dim / acc1 #a78bfa / acc2 #f472b6 / acc3 #fbbf24 / live #34d399; shadcn dark vars mapped to the same palette.
+- Motion utilities: .glass, .film-grain (z -1), .grad-text (animated), .pb-grad-btn, .sheen, .eq (5 bars), .heartbeat, .pb-conic-ring (@property --ang ringspin), .pb-marquee-track, .float-slow/med/fast, .pb-pop, .pb-bounce-dot, .pb-scroll, .pb-dots + all keyframes; prefers-reduced-motion kills ambient animation.
+- layout.tsx: Space Grotesk (--font-space) + Inter; metadata rebranded "PlayBeat Digital — AI that grooves with you"; AuthProvider wraps app (body).
+- html overflow-x: clip (tilted marquee bleed fix).
+
+Stage Summary:
+- Full design-token swap from navy/gold to violet/pink/gold; Bootstrap reference recreated with Tailwind 4 primitives.
+
+---
+Task ID: 14
+Agent: main (Z.ai Code)
+Task: Motion primitives + node-graph recolor
+
+Work Log:
+- aurora-canvas.tsx: fixed full-page canvas, 5 additive radial-gradient orbs drifting on sine paths; reduced-motion static; pause on hidden tabs.
+- scroll-progress.tsx (3px gradient bar, rAF-throttled), marquee.tsx (tilted -1.2° infinite track), count-up.tsx (IntersectionObserver + easeOutCubic rAF).
+- node-flow-canvas.tsx recolored: node headers/wires/pulses in violet/pink/gold/teal, body #12151d, glow pink; font now reads --font-space.
+- types.ts: +AuthUser, HealthStatus.auth.
+
+Stage Summary:
+- The "full vivid live motion" layer is complete: aurora + grain + eq + marquee + sheen + heartbeat + conic rings + float + pop-in + count-up + progress bar.
+
+---
+Task ID: 15
+Agent: main (Z.ai Code)
+Task: Auth frontend — provider, modal, nav
+
+Work Log:
+- auth-provider.tsx: session context (user/loading), restores via GET /api/auth/me on mount; signup/login/logout hit /api/auth/*; owns auth-modal open state + mode.
+- auth-modal.tsx: shadcn Dialog styled as the reference auth-card (their Bootstrap modal → shadcn/ui equivalent per stack policy); Sign in/Sign up pills (active = gradient), display-name field on signup, 8+ char password, inline error box, sheen submit, scrypt/HMAC honesty note; auto-closes + toasts on success.
+- site-nav.tsx: fixed glass pill (top-4, min(920px,94vw)), EQ bars + ◉ PlayBeatDigital, Chat/Worlds/Features links, gradient Sign in pill → signed-in user chip (initials avatar, name, ⏻ sign out w/ toast).
+
+Stage Summary:
+- Sign-up authentication is fully wired frontend↔backend; nav swaps Sign in ↔ user chip live.
+
+---
+Task ID: 16
+Agent: main (Z.ai Code)
+Task: Hero rewrite — split layout + film collage
+
+Work Log:
+- 2-col split (1.05fr/.95fr): badge, "Talk to the beat of your ideas." grad-text, sub, Start chatting (pb-grad-btn sheen) + Explore the vibe (glass), CountUp stats 24/7 · 128k · 99%.
+- Collage: main card = VOLTAIRE film (autoplay muted loop, poster, ● film badge, sound toggle VolumeX/Volume2, caption "the soundscape layer — VOLTAIRE"); studio mode (neon-portrait) + headline mode (dj-headphones) photo cards.
+- Cursor parallax: per-card data-depth translate3d via style.transform — composes with CSS rotate (Tailwind v4 rotate property) and floaty (translate property), so tilt + float + rotation stack.
+- figcaption→span (semantics fix), duplicate react import merged.
+
+Stage Summary:
+- Hero now carries the film + photos + count-ups + parallax; verified video autoplays (currentTime advancing).
+
+---
+Task ID: 17
+Agent: main (Z.ai Code)
+Task: Studio rewrite — auth-gated chatbox
+
+Work Log:
+- Converted to cookie-session API contract (Task 8): GET/DELETE /api/conversations[...], POST /api/chat {conversationId?, message} — no uid params.
+- Auth gate: loading spinner → lock state (conic-ring lock icon, Sign in / Create account buttons opening the modal) → signed-in studio.
+- Restyle: glass shell + spinning conic ring, heartbeat pulse dot, EQ header, "online — vibing", SQLite/KIMI badges, pop-in messages, gradient user bubbles (acc1→acc2, text-void), glass bot bubbles, 3 bounce typing dots, pink→gold send button (hover scale-106 -rotate-8), sessions active row acc2/10, suggestion cards glass.
+- Sessions sidebar footer: "N sessions · saved to {name}'s account". NodeFlowCanvas now breathes behind the studio glass at 30% opacity (comfy.org signature preserved in the new theme).
+- pipeline-strip.tsx + markdown.tsx recolored (active=acc2 glow, done=acc3 checks+gold wires, strong=gold, links=violet, blockquote pink).
+
+Stage Summary:
+- Chat is account-scoped end-to-end; studio locks/unlocks with the session.
+
+---
+Task ID: 18
+Agent: main (Z.ai Code)
+Task: Worlds, features, closing + page assembly
+
+Work Log:
+- worlds.tsx: 5 world cards (Producer's Den/drum-stage, Synthwave Nights/neon-portrait, Liquid Chrome/dj-headphones, Aurora Mind/dancing-silhouette, The Film Room/adobe-stage sm:col-span-2) with hover lift+tilt+zoom 1.12; deleted showcase.tsx + capabilities.tsx.
+- features.tsx: 3 glass cards Instant/Sharp/Yours (Yours = account privacy tie-in).
+- closing.tsx: VOLTAIRE ticker rail (7 brand phrases, pause on hover) + "Ready to groove?" CTA band (dots + glow orb + sheen CTA).
+- page.tsx: AuroraCanvas (fixed -z20) + film-grain (z -1) + ScrollProgress (z60) + SiteNav (z50) + AuthModal; section order hero → marquee → worlds → studio → features → closing; footer mt-auto + safe-area ("playbeatdigital.world / made with ♥ and too much coffee"); root div carries no bg so the aurora reads through (body bg propagates to canvas).
+
+Stage Summary:
+- Page rebuilt to the reference structure 1:1.
+
+---
+Task ID: 19
+Agent: main (Z.ai Code)
+Task: Integration — lint + dev.log
+
+Work Log:
+- Fixed: unused eslint-disable (auth-modal), removed silly ternary (studio), html overflow-x: clip for the tilted marquee bleed (docScrollW 379→375 on mobile).
+- `bun run lint` passes clean; dev.log shows full green chain: me 401→signup 201→conversations 200→chat 200 (LLM ~1s)→messages 200→logout 200→login 200→restore 200. Zero console/page errors.
+
+Stage Summary:
+- No lint errors, no runtime errors, no horizontal overflow.
+
+---
+Task ID: 20
+Agent: main (Z.ai Code)
+Task: Agent-browser E2E — auth + chat + motion + responsive
+
+Work Log:
+- Errors/console: clean (only HMR).
+- Hero: video autoplayed (readyState 4, currentTime advancing), stats counted to 24/7 · 128k · 99%, marquee + progress bar + grain present; VLM audit 5/5 yes, "no breakage", wow 9/10.
+- Auth golden path: nav Sign in → modal → Sign up tab → created test-director@playbeat.dev → toast "Welcome, Test Director" + user chip (TD initials); sign out → studio lock state; sign in again → "Welcome back" toast + session restored ("2 msgs · less than a minute ago").
+- Chat golden path (authed): "Give me a one-line tagline for a neon rooftop party this Friday." → real LLM: "Neon Nights, High City Lights"; VLM studio audit 6/6 yes.
+- Motion: aurora canvas frame-diff = animating; VLM mobile audit: no overlap, collage fits, gradient headline readable.
+- Footer: visible at bottom (pageH 5429), correct text; docScrollW == vw after clip fix.
+- Cleanup: deleted test account + its conversation and the orphaned pre-auth conversation; DB now 0 conversations / 0 messages / 0 test users. Lint clean; screenshots removed.
+
+Stage Summary:
+- All E2E checks passed. Site is interactive and runnable end-to-end.
+
+---
+Task ID: 21
+Agent: main (Z.ai Code)
+Task: Final report to user
+
+Work Log:
+- Appended Tasks 12–21 records; final summary delivered in chat.
+
+Stage Summary:
+- PlayBeat Digital regenerated: vivid live-motion frontend, sign-up authentication, VOLTAIRE film hero — live on / for the Preview Panel.

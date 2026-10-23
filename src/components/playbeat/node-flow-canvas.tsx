@@ -27,8 +27,8 @@ type GNode = {
 
 type Edge = { a: number; b: number; speed: number; offset: number; hue: string };
 
-const NODE_COLORS = ["#e3b23c", "#8f98a8", "#4a8a7d", "#c07a5f"];
-const WIRE_HUES = ["#e3b23c", "#e3b23c", "#c8cdd6", "#4a8a7d"];
+const NODE_COLORS = ["#a78bfa", "#f472b6", "#fbbf24", "#34d399"];
+const WIRE_HUES = ["#a78bfa", "#f472b6", "#fbbf24", "#34d399"];
 
 const NODE_TITLES = [
   "PlayBeat Prompt",
@@ -121,10 +121,10 @@ export function NodeFlowCanvas({ className }: { className?: string }) {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const { nodes, edges } = buildGraph();
 
-    // Resolve the Sora font stack registered by next/font.
+    // Resolve the Space Grotesk font stack registered by next/font.
     let displayFont = "system-ui, sans-serif";
     try {
-      const v = getComputedStyle(document.documentElement).getPropertyValue("--font-sora");
+      const v = getComputedStyle(document.documentElement).getPropertyValue("--font-space");
       if (v && v.trim().length > 2) displayFont = v.trim();
     } catch {
       /* keep fallback */
@@ -157,7 +157,7 @@ export function NodeFlowCanvas({ className }: { className?: string }) {
 
       // ── dot grid ──────────────────────────────────────────────
       const gap = 26;
-      ctx.fillStyle = "rgba(200,205,214,0.055)";
+      ctx.fillStyle = "rgba(255,255,255,0.045)";
       for (let x = gap / 2; x < w; x += gap) {
         for (let y = gap / 2; y < h; y += gap) {
           ctx.fillRect(x, y, 1.4, 1.4);
@@ -177,7 +177,7 @@ export function NodeFlowCanvas({ className }: { className?: string }) {
         const x2 = bx;
         const y2 = by + b.h * 0.3;
         const dx = Math.max(38, Math.abs(x2 - x1) * 0.5);
-        ctx.strokeStyle = "rgba(200,205,214,0.13)";
+        ctx.strokeStyle = "rgba(255,255,255,0.11)";
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.bezierCurveTo(x1 + dx, y1, x2 - dx, y2, x2, y2);
@@ -219,20 +219,20 @@ export function NodeFlowCanvas({ className }: { className?: string }) {
 
         ctx.save();
         if (glow > 0) {
-          ctx.shadowColor = "rgba(227,178,60,0.65)";
+          ctx.shadowColor = "rgba(244,114,182,0.6)";
           ctx.shadowBlur = 26 * glow;
         }
 
         // body
         ctx.beginPath();
         ctx.roundRect(x, y, n.w, n.h, 9);
-        ctx.fillStyle = "rgba(16,24,46,0.78)";
+        ctx.fillStyle = "rgba(18,21,33,0.82)";
         ctx.fill();
         ctx.lineWidth = 1;
         ctx.strokeStyle =
           glow > 0
-            ? `rgba(227,178,60,${0.45 + glow * 0.4})`
-            : "rgba(200,205,214,0.2)";
+            ? `rgba(244,114,182,${0.45 + glow * 0.4})`
+            : "rgba(255,255,255,0.16)";
         ctx.stroke();
 
         // header bar
@@ -244,21 +244,21 @@ export function NodeFlowCanvas({ className }: { className?: string }) {
         ctx.globalAlpha = 1;
 
         // header title
-        ctx.fillStyle = "#0a0f1c";
+        ctx.fillStyle = "#0a0a12";
         ctx.font = `700 8.5px ${displayFont}`;
         ctx.textBaseline = "middle";
         ctx.fillText(n.title, x + 7, y + 8.5, n.w - 14);
 
         // body contents
         if (n.kind === "lines") {
-          ctx.fillStyle = "rgba(200,205,214,0.16)";
+          ctx.fillStyle = "rgba(255,255,255,0.14)";
           for (let l = 0; l < 3; l++) {
             ctx.beginPath();
             ctx.roundRect(x + 8, y + 24 + l * 9, (n.w - 20) * (0.9 - l * 0.22), 3, 2);
             ctx.fill();
           }
         } else if (n.kind === "slider") {
-          ctx.fillStyle = "rgba(200,205,214,0.14)";
+          ctx.fillStyle = "rgba(255,255,255,0.12)";
           ctx.beginPath();
           ctx.roundRect(x + 8, y + 30, n.w - 16, 3, 2);
           ctx.fill();
@@ -276,20 +276,20 @@ export function NodeFlowCanvas({ className }: { className?: string }) {
           const on = Math.sin(t * 0.8 + n.phase) > 0;
           ctx.beginPath();
           ctx.roundRect(x + 8, y + 24, 22, 12, 6);
-          ctx.fillStyle = on ? n.color : "rgba(200,205,214,0.16)";
+          ctx.fillStyle = on ? n.color : "rgba(255,255,255,0.14)";
           ctx.fill();
           ctx.beginPath();
           ctx.arc(x + (on ? 25 : 13), y + 30, 4, 0, Math.PI * 2);
-          ctx.fillStyle = on ? "#0a0f1c" : "#c8cdd6";
+          ctx.fillStyle = on ? "#0a0a12" : "#f4f2ff";
           ctx.fill();
-          ctx.fillStyle = "rgba(200,205,214,0.2)";
+          ctx.fillStyle = "rgba(255,255,255,0.18)";
           ctx.beginPath();
           ctx.roundRect(x + 36, y + 27, n.w - 48, 3, 2);
           ctx.fill();
         }
 
         // ports
-        ctx.fillStyle = "#0a0f1c";
+        ctx.fillStyle = "#0a0a12";
         ctx.strokeStyle = n.color;
         ctx.lineWidth = 1.4;
         ctx.beginPath();

@@ -1,44 +1,46 @@
 import { SiteNav } from "@/components/playbeat/site-nav";
+import { ScrollProgress } from "@/components/playbeat/scroll-progress";
+import { AuroraCanvas } from "@/components/playbeat/aurora-canvas";
+import { AuthModal } from "@/components/playbeat/auth-modal";
 import { Hero } from "@/components/playbeat/hero";
+import { Marquee } from "@/components/playbeat/marquee";
+import { Worlds } from "@/components/playbeat/worlds";
 import { Studio } from "@/components/playbeat/studio";
-import { Showcase } from "@/components/playbeat/showcase";
-import { Capabilities } from "@/components/playbeat/capabilities";
+import { Features } from "@/components/playbeat/features";
 import { Closing } from "@/components/playbeat/closing";
 
 /**
- * PlayBeat AI — playbeatdigital.world
- * ComfyUI-node-graph-inspired AI chat app.
- * Single user-visible route: landing + Studio chat on one page.
+ * PlayBeat Digital — playbeatdigital.world
+ * "AI that grooves with you" — vivid live-motion landing + chatbox.
+ * Layering: body canvas bg → aurora (z-20) → grain (z-1) → content → nav (50) → progress (60).
  */
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-navy-deep">
+    <div className="flex min-h-screen flex-col">
+      {/* ambient layers (fixed) */}
+      <AuroraCanvas />
+      <div className="film-grain" aria-hidden="true" />
+
+      <ScrollProgress />
       <SiteNav />
+      <AuthModal />
 
       <main className="flex-1">
         <Hero />
+        <Marquee />
+        <Worlds />
         <Studio />
-        <Showcase />
-        <Capabilities />
+        <Features />
         <Closing />
       </main>
 
-      <footer className="mt-auto border-t border-silver/12 bg-navy-deep">
+      <footer className="mt-auto border-t border-white/12 bg-black/20">
         <div
-          className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-7 text-center text-[11.5px] text-silver/45 sm:px-6 md:flex-row md:text-left"
+          className="mx-auto flex w-[min(920px,92vw)] flex-col items-center justify-between gap-2 px-4 py-7 text-center text-[13px] text-dim sm:px-6 md:flex-row md:text-left"
           style={{ paddingBottom: "max(1.75rem, env(safe-area-inset-bottom, 0px))" }}
         >
-          <p>
-            © 2026 PlayBeat AI · part of PlayBeat Digital —{" "}
-            <span className="text-silver/60">playbeatdigital.world</span>
-          </p>
-          <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
-            <span>Node graph inspired by ComfyUI</span>
-            <span aria-hidden="true" className="text-gold/40">
-              ·
-            </span>
-            <span>Made for your next big idea</span>
-          </p>
+          <span className="font-medium text-ink/80">playbeatdigital.world</span>
+          <span className="text-dim/70">made with ♥ and too much coffee</span>
         </div>
       </footer>
     </div>

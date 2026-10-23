@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Sora, Inter, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "@/components/playbeat/auth-provider";
 
-const sora = Sora({
-  variable: "--font-sora",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space",
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const inter = Inter({
@@ -20,37 +21,36 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PlayBeat AI — Your ideas, in motion · playbeatdigital.world",
+  title: "PlayBeat Digital — AI that grooves with you · playbeatdigital.world",
   description:
-    "A ComfyUI-node-graph-inspired AI chat studio. Every conversation flows through Prompt → Router → KIMI Core → Deliver, powered by KIMI. Built by PlayBeat Digital.",
+    "An AI chatbox that feels like a late-night studio session — warm, fast, and always in your corner. Talk to the beat of your ideas: ask anything, build anything.",
   keywords: [
-    "PlayBeat AI",
+    "PlayBeat Digital",
     "playbeatdigital.world",
-    "KIMI",
-    "node graph",
-    "ComfyUI",
-    "AI chat",
+    "AI chatbox",
+    "VOLTAIRE",
+    "People Playing With The Beat",
     "creative co-pilot",
+    "late-night studio",
   ],
   authors: [{ name: "PlayBeat Digital" }],
   icons: { icon: "/favicon.svg" },
   openGraph: {
-    title: "PlayBeat AI — Your ideas, in motion",
+    title: "PlayBeat Digital — AI that grooves with you",
     description:
-      "Chat wired into a live node graph: prompt → route → generate → deliver. The quiet studio for your next big idea.",
+      "An AI chatbox that feels like a late-night studio session. Ask anything. Build anything.",
     siteName: "playbeatdigital.world",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "PlayBeat AI — Your ideas, in motion",
-    description:
-      "Chat wired into a live node graph: prompt → route → generate → deliver.",
+    title: "PlayBeat Digital — AI that grooves with you",
+    description: "Talk to the beat of your ideas.",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0f1c",
+  themeColor: "#0a0a12",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -64,10 +64,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
-        className={`${sora.variable} ${inter.variable} ${geistMono.variable} font-sans antialiased bg-navy-deep text-silver-lt`}
+        className={`${spaceGrotesk.variable} ${inter.variable} ${geistMono.variable} font-sans antialiased bg-void text-ink`}
       >
-        {children}
-        <Toaster />
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

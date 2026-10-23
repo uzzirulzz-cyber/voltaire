@@ -1,4 +1,4 @@
-/** Shared API types (mirror of the backend contract — see worklog Task 3). */
+/** Shared API types (mirror of the backend contracts — see worklog Tasks 3 & 8). */
 
 export interface Conversation {
   id: string;
@@ -23,6 +23,14 @@ export interface HealthStatus {
   project: string;
   database: string;
   ai: string;
+  auth: string;
   model: string;
   time: string;
+}
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
 }
