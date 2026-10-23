@@ -1,0 +1,16 @@
+# Keep serverless uploads lean — app never imports these at build/runtime.
+skills
+examples
+upload
+download
+tool-results
+agent-ctx
+mini-services
+.zscripts
+.github
+tests
+worklog.md
+.git
+.env
+dev.log
+server.log
