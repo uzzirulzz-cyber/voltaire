@@ -11,8 +11,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
-    "cf:build": "bunx --package @opennextjs/cloudflare opennextjs-cloudflare build",
-    "cf:deploy": "bunx --package @opennextjs/cloudflare opennextjs-cloudflare deploy"
+    "cf:build": "npm install --no-save @opennextjs/cloudflare && npx opennextjs-cloudflare build",
+    "cf:deploy": "npm install --no-save @opennextjs/cloudflare && npx opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
