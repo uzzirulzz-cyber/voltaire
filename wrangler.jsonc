@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "voltaire-world",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "r2_buckets": [
+    {
+      "binding": "VOLTAIRE",
+      "bucket_name": "voltaire"
+    }
+  ],
+  "vars": {
+    "AI_FALLBACK_KIMI": "True",
+    "AI_PROVIDER": "huggingface ",
+    "HF_MODEL": "openai/gpt-oss-120b:fastest"
+  },
+  "observability": {
+    "enabled": true
+  }
+}
