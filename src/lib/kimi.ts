@@ -164,13 +164,13 @@ function isRetryableStatus(status: number): boolean {
   return status === 429 || status === 503 || status >= 500;
 }
 
-/** POST to Gemini with 3 attempts (900ms / 2.6s backoff) on 429/5xx. */
+/** POST to Gemini with 5 attempts and escalating backoff on 429/5xx. */
 async function fetchGeminiWithRetry(
   url: string,
   body: Record<string, unknown>,
   timeoutMs: number
 ): Promise<Response> {
-  const delays = [900, 2_600];
+  const delays = [1_000, 3_000, 8_000, 16_000];
   let lastError: Error = new Error('Gemini request failed');
   for (let attempt = 0; attempt <= delays.length; attempt++) {
     if (attempt > 0) await sleep(delays[attempt - 1]);
@@ -398,13 +398,32 @@ export async function* streamKimiPipeline(
 
   /* ── Gemini (public Google AI Studio API — works from serverless) ── */
   const geminiKey = geminiApiKey();
+  let geminiError: unknown = null;
   if (geminiKey) {
-    const model =
+    const primary =
       requestedModel && isGeminiModel(requestedModel)
         ? requestedModel
         : GEMINI_DEFAULT_MODEL;
-    yield* streamGemini(messages, model, maxTokens);
-    return;
+    /* Overloaded flash (503) → fall back to the pro preview once. */
+    const fallback =
+      primary === GEMINI_DEFAULT_MODEL
+        ? 'gemini-3.1-pro-preview'
+        : GEMINI_DEFAULT_MODEL;
+    let yieldedAny = false;
+    for (const model of [primary, fallback]) {
+      try {
+        for await (const delta of streamGemini(messages, model, maxTokens)) {
+          yieldedAny = true;
+          yield delta;
+        }
+        return;
+      } catch (error) {
+        geminiError = error;
+        /* Mid-stream failure — retrying would duplicate the partial
+         * reply already delivered. Surface the error instead. */
+        if (yieldedAny) throw error;
+      }
+    }
   }
 
   /* ── Z.AI direct (OpenAI-compatible SSE) ──────────────────────────── */
@@ -436,11 +455,19 @@ export async function* streamKimiPipeline(
   }
 
   /* ── SDK fallback: full completion, re-chunked into visible deltas ── */
-  const content = await runKimiFallback(messages);
-  const chunks = content.match(/\S+\s*|\s+/g) ?? [content];
-  for (const chunk of chunks) {
-    yield chunk;
-    await sleep(12); // typewriter cadence — preview visibly builds up
+  try {
+    const content = await runKimiFallback(messages);
+    const chunks = content.match(/\S+\s*|\s+/g) ?? [content];
+    for (const chunk of chunks) {
+      yield chunk;
+      await sleep(12); // typewriter cadence — preview visibly builds up
+    }
+  } catch (sdkError) {
+    /* The SDK needs .z-ai-config (local dev only). In production its
+     * "Configuration file not found" masks the REAL upstream failure —
+     * rethrow the Gemini error instead when we have one. */
+    if (geminiError) throw geminiError;
+    throw sdkError;
   }
 }
 
