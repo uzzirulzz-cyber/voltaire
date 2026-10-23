@@ -58,9 +58,13 @@ export function hashPassword(password: string): string {
  * The salt segment is passed to scryptSync as the SAME hex string used at
  * hash time (scrypt treats string salts as UTF-8 bytes — decoding the hex
  * first would derive from different salt bytes and never match).
- * Returns false on any malformed input — never throws.
+ * Returns false on any malformed input (including null — federated accounts
+ * have no password) — never throws.
  */
-export function verifyPassword(password: string, stored: string): boolean {
+export function verifyPassword(
+  password: string,
+  stored: string | null
+): boolean {
   try {
     const separator = stored.indexOf(':');
     if (separator <= 0) return false;

@@ -14,6 +14,10 @@ export interface UserJSON {
   id: string;
   name: string;
   email: string;
+  /** How the account authenticates: password | google | github | facebook | phone */
+  provider: string;
+  /** Federated avatar URL, when the identity provides one. */
+  photoUrl: string | null;
   createdAt: string; // ISO
 }
 
@@ -22,6 +26,8 @@ export function serializeUser(user: User): UserJSON {
     id: user.id,
     name: user.name,
     email: user.email,
+    provider: user.provider,
+    photoUrl: user.photoUrl,
     createdAt: user.createdAt.toISOString(),
   };
 }

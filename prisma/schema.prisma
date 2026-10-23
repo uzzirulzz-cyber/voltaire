@@ -40,11 +40,21 @@ model Message {
 // Task 8 — real accounts replace the client-generated uid. A signed session
 // cookie (pb_session) carries the user's uid, which is stored on
 // Conversation.uid exactly like before (ownership pattern unchanged).
+//
+// Task 27 — federated Firebase logins (Google / GitHub / Facebook / Phone).
+// passwordHash is now nullable (null for federated accounts); firebaseUid is
+// the Firebase Auth `sub`/uid claim and uniquely identifies the identity.
+// Phone (SMS) accounts get a synthesized `<digits>@phone.playbeat.digital`
+// email so the NOT NULL unique email contract keeps holding downstream.
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
   name         String
-  passwordHash String // "salt:hash" hex, scrypt
+  passwordHash String? // "salt:hash" hex, scrypt — null for federated accounts
+  firebaseUid  String?  @unique // Firebase Auth uid (google/github/facebook/phone)
+  provider     String   @default("password") // password | google | github | facebook | phone
+  photoUrl     String? // federated avatar (OAuth picture claim)
+  phone        String?  @unique // E.164 phone number (phone/SMS accounts)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }

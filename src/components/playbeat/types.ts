@@ -32,5 +32,9 @@ export interface AuthUser {
   id: string;
   name: string;
   email: string;
+  /** password | google | github | facebook | phone (Task 27) */
+  provider: string;
+  /** Federated avatar URL, when the identity provides one. */
+  photoUrl: string | null;
   createdAt: string;
 }

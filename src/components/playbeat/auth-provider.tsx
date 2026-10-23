@@ -28,6 +28,8 @@ interface AuthCtx {
   setMode: (m: AuthMode) => void;
   signup: (name: string, email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
+  /** Exchange a client-minted Firebase ID token for the pb_session cookie. */
+  firebaseLogin: (idToken: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -98,6 +100,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(data.user);
   }, []);
 
+  /* Task 27 — federated (Google / GitHub / Facebook / Phone) sign-in: the
+     client SDK mints the Firebase ID token, this route verifies it and
+     issues the same pb_session cookie as email+password login. */
+  const firebaseLogin = useCallback(async (idToken: string) => {
+    const res = await fetch("/api/auth/firebase", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(data?.error ?? "Could not sign you in.");
+    setUser(data.user);
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
@@ -119,6 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setMode,
         signup,
         login,
+        firebaseLogin,
         logout,
       }}
     >
