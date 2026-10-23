@@ -96,10 +96,15 @@ async function build() {
     return `/img/world-${String(n).padStart(2, "0")}.jpg`;
   });
 
-  // 3. brand → main site
+  // 4. brand → main site
   world = world.replace(
     /<div class="brand">([\s\S]*?)<\/div>\s*<\/div>/,
     `<a class="brand" href="https://playbeatdigital.world" style="text-decoration:none;color:inherit">$1</div></a>`,
+  );
+  // nav: a Sign in link to the world's sign-in page (Task 28)
+  world = world.replace(
+    `<span class="pill mono"><i class="pulse-dot"></i>WORLD PREVIEW</span>`,
+    `<span class="pill mono"><i class="pulse-dot"></i>WORLD PREVIEW</span>\n    <a class="ghost" href="/signin.html" style="text-decoration:none">Sign in</a>`,
   );
   world = world
     .replace(
@@ -148,9 +153,20 @@ async function build() {
   logo = logo.replace(/data:image\/png;base64,[A-Za-z0-9+/=]{100,}/g, "/img/voltaire-logo.png");
   await writeFile(path.join(OUT, "logo.html"), logo);
 
-  // ── signin.html ──
+  // ── signin.html — real Firebase sign-in (Task 28) ──
   let signin = await readFile("upload/PlayBeat VOLTAIRE _ Sign in _ Sign up (3).html", "utf8");
   signin = signin.replace(/data:image\/webp;base64,[A-Za-z0-9+/=]{100,}/g, "/img/voltaire-signin.webp");
+  // Inject the federated UI + phone flow + signed-in panel + module script
+  // right before the .volt-auth-card closes (after both tab panels).
+  const authInject = await readFile("scripts/voltaire-auth.inject.html", "utf8");
+  const formEnd = signin.lastIndexOf("</form>");
+  if (formEnd < 0) throw new Error("signin.html: no <form> found");
+  const panelClose = signin.indexOf("</div>", formEnd); // closes #signup tab panel
+  const cardClose = signin.indexOf("</div>", panelClose + 6); // closes .volt-auth-card
+  if (panelClose < 0 || cardClose < 0) throw new Error("signin.html: card structure not found");
+  signin = signin.slice(0, cardClose) + "\n  " + authInject + "\n  " + signin.slice(cardClose);
+  // Give the card an id for the busy-state CSS hook.
+  signin = signin.replace('class="volt-auth-card"', 'class="volt-auth-card" id="volt-auth-card"');
   await writeFile(path.join(OUT, "signin.html"), signin);
 
   // ── bots.html ──
@@ -218,7 +234,10 @@ async function main() {
       body: buf,
       headers: {
         "Content-Type": MIME[ext] ?? "application/octet-stream",
-        "Cache-Control": rel === "index.html" ? "public, max-age=300" : "public, max-age=3600",
+        "Cache-Control":
+          rel === "index.html" || rel === "signin.html"
+            ? "public, max-age=300"
+            : "public, max-age=3600",
       },
     });
     if (res.ok) ok++;
@@ -237,19 +256,31 @@ async function main() {
     console.log(`r2.dev: ${worldUrl}`);
   }
 
-  // 4. custom domain — POST domains/custom {domain, zoneId, enabled} (camelCase!)
+  // 4. custom domain — SAFE attach: the hostname has been served by the
+  // "voltaire-world" Worker via a Workers Domain since Task 25 (an R2
+  // custom domain on the same hostname caused the bare-"/" 404). Only POST
+  // the R2 custom domain when the Workers Domain is NOT in place.
   let custom = false;
-  const att = await api("POST", `${API}/r2/buckets/${BUCKET}/domains/custom`, {
-    domain: "voltaire.playbeat.digital",
-    zoneId: "1cb2b3ac243514b2e2a090d77545f5b8",
-    enabled: true,
-  });
-  if (att.status < 300 && att.json.success) {
+  const workersDomains = await api("GET", `${API}/workers/domains`);
+  const workerHolds = ((workersDomains.json.result ?? []) as { hostname?: string; service?: string }[]).some(
+    (d) => d.hostname === "voltaire.playbeat.digital" && d.service === "voltaire-world",
+  );
+  if (workerHolds) {
     custom = true;
     worldUrl = "https://voltaire.playbeat.digital";
-    console.log("custom domain attached: voltaire.playbeat.digital ✓");
+    console.log("hostname held by workers domain (voltaire-world) ✓ — skipping R2 custom domain");
   } else {
-    console.log(`custom domain attach failed: ${att.status}`, JSON.stringify(att.json.errors));
+    const att = await api("POST", `${API}/r2/buckets/${BUCKET}/domains/custom`, {
+      domain: "voltaire.playbeat.digital",
+      zoneId: "1cb2b3ac243514b2e2a090d77545f5b8",
+      enabled: true,
+    });
+    if (att.status < 300 && att.json.success) {
+      custom = true;
+      console.log("custom domain attached: voltaire.playbeat.digital ✓");
+    } else {
+      console.log(`custom domain attach failed: ${att.status}`, JSON.stringify(att.json.errors));
+    }
   }
 
   await writeFile("/tmp/r2-world-url.txt", worldUrl);

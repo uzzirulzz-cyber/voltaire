@@ -142,6 +142,15 @@ export function firebaseErrorMessage(error: unknown): string {
     case 'auth/network-request-failed':
       return 'Network hiccup talking to Firebase — check your connection and retry.';
     default:
+      // Non-Firebase errors (e.g. our API's own message) keep their text.
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        typeof (error as Error).message === 'string' &&
+        (error as Error).message
+      ) {
+        return (error as Error).message;
+      }
       return 'Firebase sign-in failed — please try again.';
   }
 }
