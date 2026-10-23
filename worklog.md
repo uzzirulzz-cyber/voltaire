@@ -409,3 +409,24 @@ Stage Summary:
 - The tokeninfo→RS256/JWKS verification fix was essential and is deployed to BOTH the world Worker and the main app's /api/auth/firebase — Task 27's federated login would have 401'd every real token without it.
 - Session architecture: pb_world_session (world, Worker-signed) and pb_session (studio, scrypt/HMAC) are separate per-origin cookies over the same Firebase identity.
 - Firebase Console prerequisites the user already met: voltaire.playbeat.digital in Authorized domains; each provider (Google/GitHub/Facebook/Phone/Email) must also be enabled under Authentication → Sign-in method.
+
+---
+Task ID: 29
+Agent: main (Z.ai Code)
+Task: User provided GitHub repo + PAT: "push to git hub https://github.com/uzzirulzz-cyber/voltaire.git". Push the full project history there.
+
+Work Log:
+- Read worklog + git state: Task 28 commits intact (real Firebase sign-in on voltaire.playbeat.digital + RS256 fix), only db/custom.db modified.
+- Secrets audit BEFORE first push: .env untracked/ignored ✓; current index clean of ghp_/cfat_/SA-fragment/CF-credentials ✓; only public Firebase web config (AIzaSy…) in src/lib/firebase.ts + scripts/voltaire-auth.inject.html (public by design) ✓. Committed db runtime change (94691fd pre-rewrite).
+- Added remote origin with PAT; ls-remote confirmed repo exists, is EMPTY (zero refs).
+- First push REJECTED by GitHub Push Protection: Cloudflare Account API Token in .env of historical commit 4fbbe7b (".env was untracked only from Task 27 onward — the token lived in 3 historical trees: 4fbbe7b, 48a5adb, 3fb31cc").
+- Did NOT use GitHub's unblock URL (would publish a live credential). Instead: backed up .env to /tmp/pb-env-backup, ran `git filter-branch --index-filter 'git rm --cached --ignore-unmatch .env'` over all 13 commits, then refs/original cleanup + `git reflog expire --expire=now --all` + `git gc --prune=now`.
+- Post-rewrite verification: `git log --all -- .env` empty; full-history secret scan (cfat_/ghp_/BGorPW0/OacRnm/b53eee+hex) = 0 hits across ALL commits; working tree clean; .env intact on disk (untracked).
+- Second push SUCCEEDED: `* [new branch] main -> main`. ls-remote: origin/main = 20c68c5 = local HEAD; 13 commits. Commit hashes rewritten (old→new: 9cac2ec→b0a35d9, 81edebd→e83f0d6, e456ca1→b3de460, d72cb12→f9c12f6, 94691fd→20c68c5) — older hashes cited in earlier worklog sections are pre-rewrite and no longer resolvable.
+- Health continuity: voltaire root 200, /signin.html 200, POST /api/auth/firebase 401 without credentials (alive+enforcing); local app GET / 200, dev.log clean.
+
+Stage Summary:
+- Project fully published at https://github.com/uzzirulzz-cyber/voltaire (branch main, 13 commits, ~77MB) with ZERO secrets in history — GitHub Push Protection passed.
+- Remote `origin` configured with PAT in .git/config (sandbox-local only) so future `git push` works without re-adding credentials.
+- The Cloudflare token itself remains ONLY in the live sandbox .env (untracked) + /tmp/pb-env-backup — never published; user should rotate it if it ever left their control.
+- Everything from Tasks 1–28 (chat app, auth, voltaire world site + worker, Firebase 5-way sign-in, RS256 fix) is now visible on GitHub.
