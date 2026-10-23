@@ -145,6 +145,163 @@ export function hasZaiDirect(): boolean {
   return zaiDirectConfig() !== null;
 }
 
+/* ═══ Gemini — Google AI Studio public API (works from any network) ═══ */
+function geminiApiKey(): string | null {
+  const key = process.env.GEMINI_API_KEY;
+  return key && key.trim() ? key.trim() : null;
+}
+
+/** True when the Gemini provider is configured. */
+export function hasGemini(): boolean {
+  return geminiApiKey() !== null;
+}
+
+const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL_RE = /^gemini-[0-9][a-zA-Z0-9.\-]*$/;
+
+function isGeminiModel(model: string): boolean {
+  return GEMINI_MODEL_RE.test(model);
+}
+
+type ChatMessage = { role: string; content: string };
+
+/**
+ * Gemini streamGenerateContent (SSE). Yields text deltas.
+ * Endpoint is public (no IP allowlist) — works from Vercel serverless.
+ */
+async function* streamGemini(
+  messages: ChatMessage[],
+  model: string,
+  maxTokens: number
+): AsyncGenerator<string, void, unknown> {
+  const key = geminiApiKey();
+  if (!key) throw new Error('GEMINI_API_KEY is not configured');
+
+  const systemParts = messages
+    .filter((m) => m.role === 'system')
+    .map((m) => ({ text: m.content }));
+  const contents = messages
+    .filter((m) => m.role !== 'system')
+    .map((m) => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    }));
+
+  const body: Record<string, unknown> = {
+    contents,
+    generationConfig: { temperature: 0.7, maxOutputTokens: maxTokens },
+  };
+  if (systemParts.length > 0) body.systemInstruction = { parts: systemParts };
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': key,
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(120_000),
+      cache: 'no-store',
+    }
+  );
+
+  if (!response.ok || !response.body) {
+    let detail = '';
+    try {
+      const err = (await response.json()) as {
+        error?: { message?: string };
+      };
+      detail = err.error?.message ? `: ${err.error.message.slice(0, 200)}` : '';
+    } catch {
+      /* body not JSON */
+    }
+    throw new Error(`Gemini failed (HTTP ${response.status})${detail}`);
+  }
+
+  /* SSE frames: data: {"candidates":[{"content":{"parts":[{"text":"…"}]}}]} */
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let newlineIndex: number;
+    while ((newlineIndex = buffer.indexOf('\n')) >= 0) {
+      const line = buffer.slice(0, newlineIndex).trim();
+      buffer = buffer.slice(newlineIndex + 1);
+      if (!line.startsWith('data:')) continue;
+      const payload = line.slice(5).trim();
+      if (!payload || payload === '[DONE]') continue;
+      try {
+        const chunk = JSON.parse(payload) as {
+          candidates?: Array<{
+            content?: { parts?: Array<{ text?: unknown }> };
+          }>;
+        };
+        const parts = chunk.candidates?.[0]?.content?.parts ?? [];
+        for (const part of parts) {
+          if (typeof part.text === 'string' && part.text) yield part.text;
+        }
+      } catch {
+        /* partial JSON — wait for more bytes */
+      }
+    }
+  }
+}
+
+/** Non-streaming Gemini generateContent (for /api/chat). */
+async function runGemini(
+  messages: ChatMessage[],
+  model: string
+): Promise<string> {
+  const key = geminiApiKey();
+  if (!key) throw new Error('GEMINI_API_KEY is not configured');
+
+  const systemParts = messages
+    .filter((m) => m.role === 'system')
+    .map((m) => ({ text: m.content }));
+  const contents = messages
+    .filter((m) => m.role !== 'system')
+    .map((m) => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    }));
+  const body: Record<string, unknown> = {
+    contents,
+    generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+  };
+  if (systemParts.length > 0) body.systemInstruction = { parts: systemParts };
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': key,
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(90_000),
+      cache: 'no-store',
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`Gemini failed (HTTP ${response.status})`);
+  }
+  const data = (await response.json()) as {
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+  };
+  const parts = data.candidates?.[0]?.content?.parts ?? [];
+  const answer = parts
+    .map((part) => (typeof part.text === 'string' ? part.text : ''))
+    .join('');
+  if (!answer.trim()) throw new Error('Gemini returned an empty completion');
+  return answer.trim();
+}
+
 /** Parse an OpenAI-compatible SSE body, yielding content deltas. */
 async function* parseSseDeltas(
   response: Response
@@ -223,6 +380,17 @@ export async function* streamKimiPipeline(
     /* fall through to Z.AI direct on failure */
   }
 
+  /* ── Gemini (public Google AI Studio API — works from serverless) ── */
+  const geminiKey = geminiApiKey();
+  if (geminiKey) {
+    const model =
+      requestedModel && isGeminiModel(requestedModel)
+        ? requestedModel
+        : GEMINI_DEFAULT_MODEL;
+    yield* streamGemini(messages, model, maxTokens);
+    return;
+  }
+
   /* ── Z.AI direct (OpenAI-compatible SSE) ──────────────────────────── */
   const cfg = zaiDirectConfig();
   if (cfg) {
@@ -274,6 +442,15 @@ export async function runKimiPipeline(
   const allowKimiFallback = process.env.AI_FALLBACK_KIMI !== 'false';
 
   let lastError: unknown;
+
+  /* ── Gemini, non-streaming (public API, serverless-safe) ──────────── */
+  if (geminiApiKey()) {
+    try {
+      return { content: await runGemini(messages, GEMINI_DEFAULT_MODEL) };
+    } catch (error) {
+      lastError = error;
+    }
+  }
 
   /* ── Z.AI direct, non-streaming (serverless-safe) ─────────────────── */
   const zcfg = zaiDirectConfig();
