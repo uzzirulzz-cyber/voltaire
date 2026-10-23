@@ -342,3 +342,21 @@ Stage Summary:
 - https://voltaire.playbeat.digital/ now serves the living VOLTAIRE world at the bare root — the 404 is gone. Architecture: R2 bucket "voltaire" (content) ← Worker "voltaire-world" (Workers Domain on the hostname, "/"→index.html, pretty paths, range/ETag, r2.dev public URL still enabled as fallback).
 - Permission map for the cfat token (documented for future tasks): R2 full ✓; workers scripts read/upload ✓; workers/domains PUT ✓; zone workers routes read ✓ / create ✗; rulesets read ✓ / write ✗; DNS ✗; pages list ✓.
 - Key recovery path if the hostname is ever broken: re-attach via PUT /accounts/{id}/workers/domains (or re-POST the R2 custom domain to restore the pre-Task-25 state).
+
+---
+Task ID: 26
+Agent: main (Z.ai Code)
+Task: User report: "these changes are not applied check and push" + pasted reference screenshot — diagnose and push
+
+Work Log:
+- VLM-analyzed the pasted reference (upload/pasted_image_1792742712800.png): the world page hero with the preview window showing the film at its ~16s "Street life, in the mix." street-section moment — ticker tabs "FIND YOUR RHYTHM / ROOFTOP SESSIONS / OPEN ROADS AFTER DARK", two photo tiles, "Train lights, crossing streets…" subtext, sound pill.
+- Diagnosed the live site vs reference in three steps: (1) live HTML greps matched the design file for all copy strings; (2) rendered the original design file at 888×698 — its frame holds a static photo (corset-DJ), while the reference frame holds page content → the reference frame = the FILM playing, not the static design; (3) mapped the film timeline with VLM (fps≈11.4): 0s countdown → 2-12s hero → 14-16s street section (reference moment) → later sections.
+- ROOT CAUSE: the deployed /media/voltaire-beat.mp4 (4.13MB) was the Task-22 amber/sepia regrade (hue s=0.18 + warm colorbalance, done for the old main-site palette). VLM read it as "a washed-out, discolored recursive mirror that looks like a buggy video feed" — clashing with the user's design and reference (vibrant neon). The world page is the user's own design and must carry the ORIGINAL film.
+- FIX (pushed): staged the byte-identical original film (upload/VOLTAIRE — People Playing With The Beat.mp4, 1,737,162B) + a vibrant poster extracted at 2.4s (the film's hero moment) + index.html with ?v=2 cache-busters on both film and poster URLs; PUT all 3 objects to the voltaire bucket via aws4fetch (Cache-Control max-age=300). Zone cache purge API is token-blocked (Authentication error) — the ?v=2 URL busts any browser cache of the amber film; the edge already serves the new objects (curl: film 1,737,162B ✓, poster 121,736B ✓, index has ?v=2 ✓).
+- Verified live in browser: film byte-compare vs upload file → IDENTICAL; film autoplaying (readyState 4), zero page/console errors; seeked to 16s and VLM-verified the frame content now matches the reference (ticker tabs ✓, street section ✓, tiles ✓, sound pill ✓, vibrant colors ✓ — remaining VLM nitpicks were scroll-timing artifacts of the moving film). Film also 4.13MB→1.74MB = faster load.
+- Updated scripts/r2-deploy.ts so a future full re-deploy is correct: film source → the original upload (not the amber public/media regrade), poster → ffmpeg-extracted at 2.4s (spawnSync), video tag → ?v=2. lint exit 0; dev server healthy (GET / 200, /api/health ok).
+
+Stage Summary:
+- https://voltaire.playbeat.digital now plays the user's ORIGINAL vibrant film in the hero preview window (byte-identical to their uploaded file) with a matching vibrant poster — matching their reference screenshot at the film's street-section moment.
+- The main site (preview panel / playbeatdigital.world) keeps its Task-22 amber harmonization by design (approved palette work) — only the world page was corrected.
+- Deploy state: bucket objects index.html + media/* updated; Worker "voltaire-world" serving; r2-deploy.ts now reproducible with the correct sources.

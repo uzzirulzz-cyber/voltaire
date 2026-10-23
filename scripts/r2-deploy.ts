@@ -17,6 +17,7 @@
  */
 import { AwsClient } from "aws4fetch";
 import { copyFile, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
 import path from "node:path";
 
 const {
@@ -62,8 +63,17 @@ async function build() {
   }
   await copyFile("/tmp/voltaire-extract/uploadPlayBeatVoltai_01.png", path.join(OUT, "img/voltaire-logo.png"));
   await copyFile("/tmp/voltaire-extract/uploadPlayBeatVOLTAI_01.webp", path.join(OUT, "img/voltaire-signin.webp"));
-  await copyFile("public/media/voltaire-beat.mp4", path.join(OUT, "media/voltaire-beat.mp4"));
-  await copyFile("public/media/voltaire-poster.jpg", path.join(OUT, "media/voltaire-poster.jpg"));
+  // The world page carries the ORIGINAL vibrant film (the user's reference),
+  // NOT the main-site amber regrade in public/media — byte-identical upload.
+  const FILM = "upload/VOLTAIRE — People Playing With The Beat.mp4";
+  await copyFile(FILM, path.join(OUT, "media/voltaire-beat.mp4"));
+  // Poster: the film's hero moment (~2.4s), extracted vibrant from the original.
+  const poster = spawnSync("ffmpeg", [
+    "-y", "-loglevel", "error", "-ss", "2.4", "-i", FILM,
+    "-frames:v", "1", "-q:v", "3", "-f", "mjpeg", "pipe:1",
+  ]);
+  if (poster.status !== 0 || !poster.stdout?.length) throw new Error("poster extraction failed");
+  await writeFile(path.join(OUT, "media/voltaire-poster.jpg"), poster.stdout);
 
   // ── index.html — the living world page ──
   let world = await readFile("upload/VOLTAIRE — Full Regeneration (2).html", "utf8");
@@ -72,7 +82,7 @@ async function build() {
   world = world.replace(
     /<div class="frame-inner" style="background-image:url\('data:image\/jpeg;base64,[^']+'\)">/,
     `<div class="frame-inner" style="background-image:url('/img/world-01.jpg')">` +
-      `<video id="film" src="/media/voltaire-beat.mp4" poster="/media/voltaire-poster.jpg" autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>`,
+      `<video id="film" src="/media/voltaire-beat.mp4?v=2" poster="/media/voltaire-poster.jpg?v=2" autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>`,
   );
   world = world.replace(
     `<div class="frame-badge">♪ Feel the bass — tap to turn on sound</div>`,
