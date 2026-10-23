@@ -156,8 +156,53 @@ export function hasGemini(): boolean {
   return geminiApiKey() !== null;
 }
 
-const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash';
+const GEMINI_DEFAULT_MODEL = 'gemini-3.8-flash';
 const GEMINI_MODEL_RE = /^gemini-[0-9][a-zA-Z0-9.\-]*$/;
+
+/** Retryable Gemini statuses: rate limit + overload + generic 5xx. */
+function isRetryableStatus(status: number): boolean {
+  return status === 429 || status === 503 || status >= 500;
+}
+
+/** POST to Gemini with 3 attempts (900ms / 2.6s backoff) on 429/5xx. */
+async function fetchGeminiWithRetry(
+  url: string,
+  body: Record<string, unknown>,
+  timeoutMs: number
+): Promise<Response> {
+  const delays = [900, 2_600];
+  let lastError: Error = new Error('Gemini request failed');
+  for (let attempt = 0; attempt <= delays.length; attempt++) {
+    if (attempt > 0) await sleep(delays[attempt - 1]);
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': geminiApiKey() ?? '',
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(timeoutMs),
+        cache: 'no-store',
+      });
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      continue; /* network hiccup — retry */
+    }
+    if (response.ok) return response;
+    let detail = '';
+    try {
+      const err = (await response.json()) as { error?: { message?: string } };
+      detail = err.error?.message ? `: ${err.error.message.slice(0, 200)}` : '';
+    } catch {
+      /* body not JSON */
+    }
+    lastError = new Error(`Gemini failed (HTTP ${response.status})${detail}`);
+    if (!isRetryableStatus(response.status)) throw lastError;
+  }
+  throw lastError;
+}
 
 function isGeminiModel(model: string): boolean {
   return GEMINI_MODEL_RE.test(model);
@@ -193,31 +238,13 @@ async function* streamGemini(
   };
   if (systemParts.length > 0) body.systemInstruction = { parts: systemParts };
 
-  const response = await fetch(
+  const response = await fetchGeminiWithRetry(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': key,
-      },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(120_000),
-      cache: 'no-store',
-    }
+    body,
+    120_000
   );
-
-  if (!response.ok || !response.body) {
-    let detail = '';
-    try {
-      const err = (await response.json()) as {
-        error?: { message?: string };
-      };
-      detail = err.error?.message ? `: ${err.error.message.slice(0, 200)}` : '';
-    } catch {
-      /* body not JSON */
-    }
-    throw new Error(`Gemini failed (HTTP ${response.status})${detail}`);
+  if (!response.body) {
+    throw new Error('Gemini returned an empty stream');
   }
 
   /* SSE frames: data: {"candidates":[{"content":{"parts":[{"text":"…"}]}}]} */
@@ -275,22 +302,11 @@ async function runGemini(
   };
   if (systemParts.length > 0) body.systemInstruction = { parts: systemParts };
 
-  const response = await fetch(
+  const response = await fetchGeminiWithRetry(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': key,
-      },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(90_000),
-      cache: 'no-store',
-    }
+    body,
+    90_000
   );
-  if (!response.ok) {
-    throw new Error(`Gemini failed (HTTP ${response.status})`);
-  }
   const data = (await response.json()) as {
     candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
   };
