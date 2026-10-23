@@ -324,3 +324,21 @@ Stage Summary:
 - The site now shows REAL breathing humans living a life on the beat: living photos in hero/worlds, the film, the living rail drifting right-to-left inside the model box with ◉ symbols, human pipeline language, zero mechanical canvas.
 - The VOLTAIRE world (12 human images + film + ticker + garage + entrance modal) is LIVE at https://voltaire.playbeat.digital (deep links /index.html; Worker "voltaire-world" uploaded, needs one route click for bare "/"). r2.dev fallback enabled. R2 creds live in .env (gitignored).
 - Cloudflare API findings recorded: domains/managed PUT for r2.dev; domains/custom POST {domain,zoneId,enabled} camelCase; R2 no index docs; openapi.yaml at cloudflare/api-schemas is the source of truth.
+
+---
+Task ID: 25
+Agent: main (Z.ai Code)
+Task: User report: "voltaire.playbeat.digital displays error nothing live" — diagnose + make the bare root live
+
+Work Log:
+- Read worklog Task 23 (lost-context record): the VOLTAIRE world WAS deployed to R2 bucket "voltaire" (20 objects, custom domain attached, r2.dev fallback) — but R2 has no index-document resolution, so bare "/" 404s with the R2 "Object not found / Is this your bucket" page. That R2 404 is exactly the "error, nothing live" the user saw; only /index.html deep links worked.
+- Probed the token's real permissions: zone workers routes GET OK / POST 403 ("No access"), rulesets list OK / dynamic-redirect entrypoint PUT unauthorized, DNS records API auth-error (no DNS scope), workers scripts + settings GET OK (Worker "voltaire-world" confirmed present with r2_bucket binding VOLTAIRE→"voltaire").
+- Fix executed (reversible swap, all via cfat token): DELETE /r2/buckets/voltaire/domains/custom/voltaire.playbeat.digital (removes the R2 DNS record) → PUT /accounts/{id}/workers/domains {hostname, zone_id, service:"voltaire-world", environment:"production"} → SUCCESS: Workers Domain attached (id 19bcfbf…, cert 890f962d… issued, enabled). The Worker now owns the hostname: "/"→index.html, pretty paths, range, ETag.
+- Verified all paths on https://voltaire.playbeat.digital: "/" 200 (19.3KB world page, title "VOLTAIRE — People Playing With The Beat"), /index.html /logo.html /signin.html /bots.html 200, /img/world-01..12.jpg 200, /media/voltaire-beat.mp4 200 (4.13MB) + poster 200, Range request → 206.
+- Agent-browser E2E on the live domain: zero page/console errors; film autoplaying (readyState 4, t=12.3s, 1552w, muted); 11 scene tiles; ticker present; sound button toggles both ways ("tap to turn on sound" ⇄ "Bass on — tap to mute", aria-pressed sync, video muted⇄unmuted); screenshot saved.
+- Main site polish: src/lib/voltaire.ts VOLTAIRE_URL → "https://voltaire.playbeat.digital" (bare canonical; was /index.html deep link) with updated architecture comment; hero chip verified rendering href=https://voltaire.playbeat.digital/ ; localhost:3000 healthy (GET / 200, /api/health 200); lint exit 0; dev.log clean.
+
+Stage Summary:
+- https://voltaire.playbeat.digital/ now serves the living VOLTAIRE world at the bare root — the 404 is gone. Architecture: R2 bucket "voltaire" (content) ← Worker "voltaire-world" (Workers Domain on the hostname, "/"→index.html, pretty paths, range/ETag, r2.dev public URL still enabled as fallback).
+- Permission map for the cfat token (documented for future tasks): R2 full ✓; workers scripts read/upload ✓; workers/domains PUT ✓; zone workers routes read ✓ / create ✗; rulesets read ✓ / write ✗; DNS ✗; pages list ✓.
+- Key recovery path if the hostname is ever broken: re-attach via PUT /accounts/{id}/workers/domains (or re-POST the R2 custom domain to restore the pre-Task-25 state).
