@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
+import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import {
   AudioWaveform,
@@ -26,14 +27,26 @@ import { useToast } from "@/hooks/use-toast";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { PipelineStrip, type PipelineStage } from "./pipeline-strip";
 import { Markdown } from "./markdown";
-import { NodeFlowCanvas } from "./node-flow-canvas";
 import { useAuth } from "./auth-provider";
+import { VOLTAIRE_URL } from "@/lib/voltaire";
 import type { ChatMessage, Conversation, HealthStatus } from "./types";
 
 /**
- * Studio — the chatbox, wired to the session-cookie backend
+ * Studio — the model box, wired to the session-cookie backend
  * (conversations persist per signed-in account — worklog Task 8).
  */
+
+/** the living layer — real people, real nights, drifting right to left */
+const LIVING_RAIL = [
+  { src: "/images/living/living-01.jpg", alt: "A performer lost in the music in front of a crowd" },
+  { src: "/images/living/living-02.jpg", alt: "Train lights after dark, the city still glowing" },
+  { src: "/images/living/living-03.jpg", alt: "People crossing a street in the flow of the night" },
+  { src: "/images/living/living-04.jpg", alt: "Headphones on, city lights up" },
+  { src: "/images/living/living-05.jpg", alt: "Behind the decks, letting the room find its rhythm" },
+  { src: "/images/living/living-06.jpg", alt: "Head tilted back, moving with the moment" },
+  { src: "/images/living/living-09.jpg", alt: "Leaning into the night on a neon circuit" },
+  { src: "/images/living/living-10.jpg", alt: "Poolside people, cocktails on ice" },
+] as const;
 
 const SUGGESTIONS = [
   {
@@ -381,7 +394,7 @@ export function Studio() {
     }
     if (messages.length === 0 && !sending) {
       return (
-        <div className="flex h-full flex-col items-center justify-center px-4 py-8 text-center">
+        <div className="flex h-full flex-col items-center justify-center px-4 py-6 text-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-acc2 to-acc3 font-display text-lg font-extrabold text-void shadow-[0_10px_36px_rgba(250,204,21,0.32)]">
             ◉
           </div>
@@ -389,9 +402,40 @@ export function Studio() {
             Warm, fast, and always in your corner
           </h3>
           <p className="mt-1.5 max-w-sm text-[13px] leading-relaxed text-dim">
-            Every message flows through the graph — prompt → route → generate →
-            deliver. Start anywhere.
+            Every message rides the beat — from your prompt to a reply that hits
+            different. Start anywhere.
           </p>
+
+          {/* the living layer — wired in right to left, straight from the world */}
+          <div className="mt-6 w-full max-w-xl">
+            <p className="mb-2.5 flex flex-wrap items-center justify-center gap-1.5 text-[10px] font-semibold tracking-[0.18em] text-dim/80 uppercase">
+              <span className="text-acc3">◉</span> the living layer —
+              <a
+                href={VOLTAIRE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-acc3 underline decoration-acc3/40 underline-offset-2 transition-colors hover:decoration-acc3"
+              >
+                voltaire.playbeat.digital ↗
+              </a>
+            </p>
+            <div className="group relative overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]">
+              <div className="pb-marquee-track gap-3 [animation-duration:26s] group-hover:[animation-play-state:paused]">
+                {[...LIVING_RAIL, ...LIVING_RAIL].map((r, i) => (
+                  <div
+                    key={i}
+                    className="relative h-20 w-32 shrink-0 overflow-hidden rounded-xl border border-white/12 sm:h-24 sm:w-40"
+                  >
+                    <Image src={r.src} alt={r.alt} fill sizes="160px" className="object-cover" />
+                    <span aria-hidden="true" className="absolute top-1.5 left-1.5 text-[10px] text-acc3 drop-shadow-md">
+                      ◉
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div className="mt-6 grid w-full max-w-lg grid-cols-1 gap-2 sm:grid-cols-2">
             {SUGGESTIONS.map((s) => {
               const Icon = s.icon;
@@ -457,8 +501,6 @@ export function Studio() {
 
   return (
     <section id="studio" className="relative z-10 scroll-mt-28 overflow-hidden px-4 py-14 sm:px-6">
-      {/* comfy.org-style node graph, alive behind the glass */}
-      <NodeFlowCanvas className="absolute inset-0 h-full w-full opacity-30" />
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-gradient-to-b from-void via-transparent to-void"
@@ -580,12 +622,12 @@ export function Studio() {
                     <p className="text-[10.5px] text-dim/70">
                       {activeSession
                         ? `${activeSession.messageCount} messages · ${activeSession.model}`
-                        : "prompt → route → generate → deliver"}
+                        : "you drop it → it hits back"}
                     </p>
                   </div>
                   <span className="ml-auto flex items-center gap-1.5 text-[10px] text-dim/50">
                     <span className={`h-1.5 w-1.5 rounded-full ${stage === 0 ? "bg-white/25" : "animate-pulse bg-acc2"}`} />
-                    {stage === 0 ? "idle" : "executing"}
+                    {stage === 0 ? "idle" : "in the groove"}
                   </span>
                 </div>
 

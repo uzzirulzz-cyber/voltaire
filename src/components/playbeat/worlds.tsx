@@ -4,49 +4,49 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 
 /**
- * Worlds — the gallery as "worlds you step inside".
+ * Worlds — the living world, humanized: real people, real nights.
  * Hover: card lifts + tilts, image zooms 1.12 over 0.8s.
  */
 
 const WORLDS = [
   {
-    emoji: "🎛",
-    title: "Producer's Den",
-    desc: "Talk arrangements, mixdowns, and that perfect low end.",
-    src: "/images/drum-stage.jpg",
-    alt: "Live drum on stage under spotlights",
-    span: "",
-  },
-  {
     emoji: "🌆",
-    title: "Synthwave Nights",
-    desc: "Retro-future ideas, neon hooks, midnight prototypes.",
-    src: "/images/neon-portrait.jpg",
-    alt: "Neon-lit portrait in night-club light",
+    title: "Afterglow Rooftop",
+    desc: "Find the dance floor. Find your people.",
+    src: "/images/living/living-07.jpg",
+    alt: "A performer in a leather jacket in front of a crowd with raised hands under blue light",
     span: "",
   },
   {
-    emoji: "🫧",
-    title: "Liquid Chrome",
-    desc: "Design brainstorms that melt into shape as you talk.",
-    src: "/images/dj-headphones.jpg",
-    alt: "DJ in headphones and sunglasses under stage lights",
+    emoji: "🌃",
+    title: "Midnight Run",
+    desc: "City lights. Your own lane.",
+    src: "/images/living/living-08.jpg",
+    alt: "Night drive through a city with lights streaking by",
     span: "",
   },
   {
-    emoji: "🌌",
-    title: "Aurora Mind",
-    desc: "Deep questions under a sky that thinks in color.",
-    src: "/images/dancing-silhouette.jpg",
-    alt: "Silhouette of a dancer in blue haze",
+    emoji: "🏍",
+    title: "Neon Circuit",
+    desc: "Lean into the night.",
+    src: "/images/living/living-09.jpg",
+    alt: "Superbike leaning through a neon-lit corner at night",
     span: "",
   },
   {
-    emoji: "🎬",
-    title: "The Film Room",
-    desc: "People playing with the beat — the VOLTAIRE cut lives here.",
-    src: "/images/adobe-stage.jpg",
-    alt: "Concert stage atmosphere with dramatic lighting",
+    emoji: "🍸",
+    title: "Blue Tide",
+    desc: "Poolside people. Cocktails on ice — rum & coke, no rush.",
+    src: "/images/living/living-10.jpg",
+    alt: "People around a poolside lounge at night with drinks",
+    span: "",
+  },
+  {
+    emoji: "🚉",
+    title: "Last train, still glowing",
+    desc: "Let the city carry the beat — the little moments between the big ones.",
+    src: "/images/living/living-02.jpg",
+    alt: "Train lights after dark, the city still glowing around it",
     span: "sm:col-span-2",
   },
 ] as const;
@@ -62,10 +62,10 @@ export function Worlds() {
           the worlds
         </span>
         <h2 className="font-display text-2xl font-bold tracking-[-0.01em] text-ink sm:text-3xl">
-          Step inside the <span className="grad-text">worlds</span>
+          Step inside the <span className="grad-text">living world</span>
         </h2>
         <p className="mt-2 text-sm text-dim">
-          Every conversation opens a door. Pick a frequency.
+          Real people, real nights — every conversation opens a door.
         </p>
       </header>
 

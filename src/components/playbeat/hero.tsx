@@ -3,8 +3,9 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Volume2, VolumeX } from "lucide-react";
+import { ExternalLink, Volume2, VolumeX } from "lucide-react";
 import { CountUp } from "./count-up";
+import { VOLTAIRE_URL } from "@/lib/voltaire";
 
 /**
  * Hero — 2-col split (their reference): copy left, floating collage right.
@@ -185,6 +186,15 @@ export function Hero() {
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-acc2" />
             film
           </span>
+          <a
+            href={VOLTAIRE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute top-3 right-3 flex items-center gap-1.5 rounded-lg border border-acc3/35 bg-black/60 px-2.5 py-1 text-[10px] font-semibold tracking-[0.08em] text-acc3 backdrop-blur-sm transition-all hover:border-acc3/70 hover:bg-acc3/15"
+          >
+            ◉ voltaire.playbeat.digital
+            <ExternalLink className="h-3 w-3" />
+          </a>
           <button
             type="button"
             onClick={toggleSound}
@@ -194,11 +204,11 @@ export function Hero() {
             {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
           </button>
           <span className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/85 to-transparent px-4 pt-7 pb-3 text-[11px] tracking-[0.1em] text-dim uppercase">
-            the soundscape layer — VOLTAIRE
+            the living world — people playing with the beat
           </span>
         </div>
 
-        {/* a — studio mode */}
+        {/* a — the people in the pulse */}
         <div
           ref={(el) => {
             cardRefs.current[1] = el;
@@ -207,18 +217,18 @@ export function Hero() {
           className="float-med absolute top-0 right-[-2%] z-2 h-[38%] w-[46%] rotate-5 overflow-hidden rounded-[20px] border border-white/12 bg-panel [box-shadow:0_30px_70px_rgba(0,0,0,.6)] [transition:transform_.18s_ease-out] [transform-style:preserve-3d] will-change-transform"
         >
           <Image
-            src="/images/neon-portrait.jpg"
-            alt="Neon-lit studio mode"
+            src="/images/living/living-01.jpg"
+            alt="A woman in a leather jacket lost in the music, crowd with raised hands behind her"
             fill
             sizes="(max-width: 1024px) 40vw, 260px"
             className="object-cover"
           />
           <span className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/85 to-transparent px-4 pt-7 pb-3 text-[11px] tracking-[0.1em] text-dim uppercase">
-            studio mode
+            the people in the pulse
           </span>
         </div>
 
-        {/* b — headline mode */}
+        {/* b — lost in the haze */}
         <div
           ref={(el) => {
             cardRefs.current[2] = el;
@@ -227,14 +237,14 @@ export function Hero() {
           className="float-fast absolute right-[4%] bottom-[2%] z-2 h-[34%] w-[44%] -rotate-6 overflow-hidden rounded-[20px] border border-white/12 bg-panel [box-shadow:0_30px_70px_rgba(0,0,0,.6)] [transition:transform_.18s_ease-out] [transform-style:preserve-3d] will-change-transform"
         >
           <Image
-            src="/images/dj-headphones.jpg"
-            alt="Headliner mode"
+            src="/images/living/living-06.jpg"
+            alt="A woman head tilted back, eyes closed, bathed in warm stage light and haze"
             fill
             sizes="(max-width: 1024px) 40vw, 260px"
             className="object-cover"
           />
           <span className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/85 to-transparent px-4 pt-7 pb-3 text-[11px] tracking-[0.1em] text-dim uppercase">
-            headline mode
+            lost in the haze — living it
           </span>
         </div>
       </motion.div>

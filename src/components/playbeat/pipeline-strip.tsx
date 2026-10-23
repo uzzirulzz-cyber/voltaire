@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { Check, PenLine, GitBranch, Cpu, UploadCloud } from "lucide-react";
 
 /**
- * PipelineStrip — the live "prompt → route → generate → deliver" node graph
- * that animates while PlayBeat processes a message.
+ * PipelineStrip — the living signal path that animates while PlayBeat
+ * feels out a message: you drop it → PlayBeat listens → KIMI feels it →
+ * it hits back.
  *
  * stage: 0 = idle · 1..4 = that node is active · 5 = complete (all done)
  */
@@ -13,18 +14,18 @@ import { Check, PenLine, GitBranch, Cpu, UploadCloud } from "lucide-react";
 export type PipelineStage = 0 | 1 | 2 | 3 | 4 | 5;
 
 const NODES = [
-  { label: "Prompt", sub: "text in", icon: PenLine },
-  { label: "Router", sub: "route", icon: GitBranch },
-  { label: "KIMI Core", sub: "generate", icon: Cpu },
-  { label: "Deliver", sub: "reply out", icon: UploadCloud },
+  { label: "Prompt", sub: "you drop it", icon: PenLine },
+  { label: "PlayBeat", sub: "listens to you", icon: GitBranch },
+  { label: "KIMI", sub: "feels the groove", icon: Cpu },
+  { label: "Reply", sub: "it hits back", icon: UploadCloud },
 ];
 
 const CORE_STATUS = [
-  "warming valves…",
-  "routing signal…",
-  "sampling tokens…",
-  "mixing words…",
-  "polishing output…",
+  "tuning the room…",
+  "feeling it out…",
+  "finding the words…",
+  "mixing the reply…",
+  "last polish…",
 ];
 
 function nodeState(
