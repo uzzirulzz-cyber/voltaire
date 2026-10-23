@@ -16,6 +16,7 @@ export async function GET() {
     project: 'playbeatdigital-world',
     database: 'connected',
     ai: 'live',
+    auth: 'live',
     model: KIMI_MODEL,
     time: new Date().toISOString(),
   };

@@ -36,3 +36,15 @@ model Message {
 
   @@index([conversationId, createdAt])
 }
+
+// Task 8 — real accounts replace the client-generated uid. A signed session
+// cookie (pb_session) carries the user's uid, which is stored on
+// Conversation.uid exactly like before (ownership pattern unchanged).
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String // "salt:hash" hex, scrypt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

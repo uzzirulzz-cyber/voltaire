@@ -10,13 +10,16 @@
  *   Deliver node   → persist the assistant reply, bump messageCount,
  *                    return the refreshed conversation
  *
- * Body: { uid: string (required), conversationId?: string, message: string }
- * When conversationId is omitted a new session is created whose title is
- * derived from the first message (42 chars + ellipsis), like the original.
+ * Body: { conversationId?: string, message: string }
+ * A `uid` field sent by old clients is ignored — the signed pb_session
+ * cookie is the only identity. When conversationId is omitted a new session
+ * is created whose title is derived from the first message (42 chars +
+ * ellipsis), like the original.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { KIMI_MODEL, runKimiPipeline } from '@/lib/kimi';
+import { getSessionUser } from '@/lib/auth';
 import { serializeConversation, serializeMessage } from '../_lib/serialize';
 
 export const dynamic = 'force-dynamic';
@@ -26,6 +29,14 @@ const TITLE_SLICE = 42;
 const HISTORY_WINDOW = 40;
 
 export async function POST(request: NextRequest) {
+  const user = await getSessionUser();
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Sign in to keep your sessions.' },
+      { status: 401 }
+    );
+  }
+
   let body: unknown;
   try {
     body = await request.json();
@@ -33,16 +44,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
+  // `uid` from old clients is deliberately ignored — session is the identity.
   const parsed = (body ?? {}) as {
-    uid?: unknown;
     conversationId?: unknown;
     message?: unknown;
   };
-
-  const uid = typeof parsed.uid === 'string' ? parsed.uid.trim() : '';
-  if (!uid) {
-    return NextResponse.json({ error: 'uid is required' }, { status: 400 });
-  }
 
   const message = typeof parsed.message === 'string' ? parsed.message.trim() : '';
   if (message.length < 1 || message.length > MAX_MESSAGE_LENGTH) {
@@ -66,7 +72,7 @@ export async function POST(request: NextRequest) {
       : null;
 
     if (conversationId) {
-      if (!conversation || conversation.uid !== uid) {
+      if (!conversation || conversation.uid !== user.uid) {
         return NextResponse.json(
           { error: 'Conversation not found' },
           { status: 404 }
@@ -75,7 +81,7 @@ export async function POST(request: NextRequest) {
     } else {
       conversation = await db.conversation.create({
         data: {
-          uid,
+          uid: user.uid,
           title:
             message.slice(0, TITLE_SLICE) +
             (message.length > TITLE_SLICE ? '…' : ''),

@@ -2,28 +2,32 @@
  * /api/conversations — session list & creation.
  *
  * Port of the original Express routes (Firestore `conversations` collection):
- * - GET  ?uid=...  → latest 50 conversations for the user, updatedAt desc
- * - POST { uid, title? } → create a new session (model pinned to KIMI)
+ * - GET  → latest 50 conversations for the signed-in user, updatedAt desc
+ * - POST { title? } → create a new session (model pinned to KIMI)
  *
- * Firebase ID tokens were replaced by a client-generated `uid` that owns
- * its conversations — mirroring the original Firestore ownership pattern.
+ * Task 8: the client-generated `uid` was replaced by the signed pb_session
+ * cookie; Conversation.uid now stores the session user's uid.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { KIMI_MODEL } from '@/lib/kimi';
+import { getSessionUser } from '@/lib/auth';
 import { serializeConversation } from '../_lib/serialize';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
-  const uid = request.nextUrl.searchParams.get('uid')?.trim();
-  if (!uid) {
-    return NextResponse.json({ error: 'uid is required' }, { status: 400 });
+export async function GET() {
+  const user = await getSessionUser();
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Sign in to keep your sessions.' },
+      { status: 401 }
+    );
   }
 
   try {
     const conversations = await db.conversation.findMany({
-      where: { uid },
+      where: { uid: user.uid },
       orderBy: { updatedAt: 'desc' },
       take: 50,
     });
@@ -40,6 +44,14 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const user = await getSessionUser();
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Sign in to keep your sessions.' },
+      { status: 401 }
+    );
+  }
+
   let body: unknown;
   try {
     body = await request.json();
@@ -47,12 +59,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const parsed = (body ?? {}) as { uid?: unknown; title?: unknown };
-
-  const uid = typeof parsed.uid === 'string' ? parsed.uid.trim() : '';
-  if (!uid) {
-    return NextResponse.json({ error: 'uid is required' }, { status: 400 });
-  }
+  const parsed = (body ?? {}) as { title?: unknown };
 
   const title =
     typeof parsed.title === 'string' && parsed.title.trim().length > 0
@@ -61,7 +68,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const conversation = await db.conversation.create({
-      data: { uid, title, model: KIMI_MODEL },
+      data: { uid: user.uid, title, model: KIMI_MODEL },
     });
 
     return NextResponse.json(

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PlayBeat Digital — AI that grooves with you</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<canvas id="aurora"></canvas>
+<div class="grain"></div>
+
+<header class="nav glass">
+  <div class="logo">
+    <span class="logo-mark">◉</span> PlayBeat<span class="accent">Digital</span>
+  </div>
+  <nav class="nav-links">
+    <a href="#chat">Chat</a>
+    <a href="#worlds">Worlds</a>
+    <a href="#features">Features</a>
+    <a href="#chat" class="cta-pill">Get Started</a>
+  </nav>
+</header>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero">
+  <div class="hero-copy reveal">
+    <div class="badge">● live — AI co-pilot</div>
+    <h1>Talk to the<br><span class="grad-text">beat of your ideas.</span></h1>
+    <p class="sub">An AI chatbox that feels like a late-night studio session — warm, fast, and always in your corner. Ask anything. Build anything.</p>
+    <div class="hero-actions">
+      <a href="#chat" class="btn-primary">Start chatting ↓</a>
+      <a href="#worlds" class="btn-ghost">Explore the vibe</a>
+    </div>
+    <div class="hero-stats">
+      <div><strong data-count="24">0</strong><span>/7 online</span></div>
+      <div><strong data-count="128">0</strong><span>k conversations</span></div>
+      <div><strong data-count="99">0</strong><span>% good vibes</span></div>
+    </div>
+  </div>
+
+  <div class="hero-visual reveal">
+    <div class="glow-orb"></div>
+    <figure class="hv-card hv-main float-slow">
+      <img src="images/7_Abstract_Aurora_Borealis_Gradient.png" alt="Aurora waves" />
+      <figcaption>the soundscape layer</figcaption>
+    </figure>
+    <figure class="hv-card hv-a float-med">
+      <img src="images/2_A_Neon_drenched_Synthwave_Music_Studio.png" alt="Neon studio" />
+      <figcaption>studio mode</figcaption>
+    </figure>
+    <figure class="hv-card hv-b float-fast">
+      <img src="images/6_Chrome_Material_Twisted_Shape_In.png" alt="Chrome blob" />
+      <figcaption>idea engine</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ═══════════ MARQUEE ═══════════ -->
+<div class="marquee">
+  <div class="marquee-track">
+    <span>ASK ✦ BUILD ✦ GROOVE ✦ REPEAT ✦ ASK ✦ BUILD ✦ GROOVE ✦ REPEAT ✦ ASK ✦ BUILD ✦ GROOVE ✦ REPEAT ✦ </span>
+    <span>ASK ✦ BUILD ✦ GROOVE ✦ REPEAT ✦ ASK ✦ BUILD ✦ GROOVE ✦ REPEAT ✦ ASK ✦ BUILD ✦ GROOVE ✦ REPEAT ✦ </span>
+  </div>
+</div>
+
+<!-- ═══════════ WORLDS / GALLERY ═══════════ -->
+<section id="worlds" class="worlds">
+  <div class="section-head reveal">
+    <h2>Step inside the <span class="grad-text">worlds</span></h2>
+    <p>Every conversation opens a door. Pick a frequency.</p>
+  </div>
+
+  <div class="world-grid">
+    <article class="world-card reveal">
+      <div class="world-img"><img src="images/8_Futuristic_Music_Studio_with_Neon.png" alt="Blue studio" /></div>
+      <div class="world-body">
+        <h3>🎛 Producer's Den</h3>
+        <p>Talk arrangements, mixdowns, and that perfect low end.</p>
+      </div>
+    </article>
+    <article class="world-card reveal">
+      <div class="world-img"><img src="images/5_A_Neon_drenched_Synthwave_Music_Studio.png" alt="Synthwave keys" /></div>
+      <div class="world-body">
+        <h3>🌆 Synthwave Nights</h3>
+        <p>Retro-future ideas, neon hooks, midnight prototypes.</p>
+      </div>
+    </article>
+    <article class="world-card reveal">
+      <div class="world-img"><img src="images/9_3d_Liquid_Metal_Iridescent_Morphing.png" alt="Liquid metal" /></div>
+      <div class="world-body">
+        <h3>🫧 Liquid Chrome</h3>
+        <p>Design brainstorms that melt into shape as you talk.</p>
+      </div>
+    </article>
+    <article class="world-card reveal">
+      <div class="world-img"><img src="images/4__2687074427_Shutterstock.png" alt="Aurora sky" /></div>
+      <div class="world-body">
+        <h3>🌌 Aurora Mind</h3>
+        <p>Deep questions under a sky that thinks in color.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ═══════════ CHAT ═══════════ -->
+<section id="chat" class="chat-section">
+  <div class="section-head reveal">
+    <h2>The <span class="grad-text">chatbox</span></h2>
+    <p>Where the vibe becomes a conversation.</p>
+  </div>
+  <div class="chat-shell glass reveal">
+    <div class="chat-head">
+      <div class="chat-id">
+        <span class="pulse-dot"></span>
+        <div>
+          <strong>PlayBeat</strong>
+          <small id="status">online — vibing</small>
+        </div>
+      </div>
+      <div class="chat-tools">
+        <button id="clearBtn" title="Clear chat">↺</button>
+      </div>
+    </div>
+
+    <div class="chat-log" id="log"></div>
+
+    <form class="chat-input" id="form">
+      <input id="msg" type="text" autocomplete="off"
+        placeholder="Drop your question, idea, or beat…" required />
+      <button type="submit" class="send-btn" aria-label="Send">➤</button>
+    </form>
+  </div>
+</section>
+
+<!-- ═══════════ FEATURES ═══════════ -->
+<section id="features" class="features">
+  <div class="feature-card glass reveal"><h3>⚡ Instant</h3><p>Replies tuned for speed — no spinner dread, just flow.</p></div>
+  <div class="feature-card glass reveal"><h3>🧠 Sharp</h3><p>Code, music, strategy — it bends to whatever you're making.</p></div>
+  <div class="feature-card glass reveal"><h3>🔒 Yours</h3><p>History lives in your Firebase — private by default.</p></div>
+</section>
+
+<footer class="foot">
+  <span>playbeatdigital.world</span>
+  <span class="dim">made with ♥ and too much coffee</span>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
