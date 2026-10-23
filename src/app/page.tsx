@@ -5,6 +5,7 @@ import { AuthModal } from "@/components/playbeat/auth-modal";
 import { Hero } from "@/components/playbeat/hero";
 import { Marquee } from "@/components/playbeat/marquee";
 import { Worlds } from "@/components/playbeat/worlds";
+import { ModelBots } from "@/components/playbeat/model-bots";
 import { Studio } from "@/components/playbeat/studio";
 import { Features } from "@/components/playbeat/features";
 import { Closing } from "@/components/playbeat/closing";
@@ -29,6 +30,7 @@ export default function Home() {
         <Hero />
         <Marquee />
         <Worlds />
+        <ModelBots />
         <Studio />
         <Features />
         <Closing />

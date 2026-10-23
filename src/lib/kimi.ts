@@ -28,9 +28,15 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function normalizeMessages(history: KimiHistoryItem[]) {
+function normalizeMessages(
+  history: KimiHistoryItem[],
+  personaSuffix?: string
+) {
+  const systemContent = personaSuffix
+    ? `${KIMI_SYSTEM_PROMPT}\n\nBot persona: ${personaSuffix}`
+    : KIMI_SYSTEM_PROMPT;
   return [
-    { role: 'system' as const, content: KIMI_SYSTEM_PROMPT },
+    { role: 'system' as const, content: systemContent },
     ...history.slice(-HISTORY_WINDOW).map((turn) => ({
       role: (turn.role === 'assistant' || turn.role === 'system' ? turn.role : 'user') as
         | 'user'
@@ -93,6 +99,167 @@ async function runKimiFallback(
   return answer.trim();
 }
 
+/* ═══ Z.AI direct — OpenAI-compatible, env-configured, streaming ══════
+ * Serverless-safe replacement for the .z-ai-config-file SDK path: the
+ * same gateway the SDK talks to, called with plain fetch + headers.
+ * Env (all optional; provider activates only when complete):
+ *   ZAI_BASE_URL, ZAI_API_KEY (Bearer), ZAI_TOKEN,
+ *   ZAI_CHAT_ID, ZAI_USER_ID
+ */
+interface ZaiDirectConfig {
+  baseUrl: string;
+  apiKey: string;
+  token: string;
+  chatId: string;
+  userId: string;
+}
+
+function zaiDirectConfig(): ZaiDirectConfig | null {
+  const baseUrl = process.env.ZAI_BASE_URL;
+  const apiKey = process.env.ZAI_API_KEY;
+  const token = process.env.ZAI_TOKEN;
+  if (!baseUrl || !apiKey || !token) return null;
+  return {
+    baseUrl: baseUrl.replace(/\/+$/, ''),
+    apiKey,
+    token,
+    chatId: process.env.ZAI_CHAT_ID || '',
+    userId: process.env.ZAI_USER_ID || '',
+  };
+}
+
+function zaiDirectHeaders(cfg: ZaiDirectConfig): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${cfg.apiKey}`,
+    'X-Z-AI-From': 'Z',
+    'X-Token': cfg.token,
+  };
+  if (cfg.chatId) headers['X-Chat-Id'] = cfg.chatId;
+  if (cfg.userId) headers['X-User-Id'] = cfg.userId;
+  return headers;
+}
+
+/** True when the env-configured Z.AI direct provider is available. */
+export function hasZaiDirect(): boolean {
+  return zaiDirectConfig() !== null;
+}
+
+/** Parse an OpenAI-compatible SSE body, yielding content deltas. */
+async function* parseSseDeltas(
+  response: Response
+): AsyncGenerator<string, void, unknown> {
+  if (!response.body) return;
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let newlineIndex: number;
+    while ((newlineIndex = buffer.indexOf('\n')) >= 0) {
+      const line = buffer.slice(0, newlineIndex).trim();
+      buffer = buffer.slice(newlineIndex + 1);
+      if (!line.startsWith('data:')) continue;
+      const payload = line.slice(5).trim();
+      if (payload === '[DONE]') return;
+      try {
+        const chunk = JSON.parse(payload) as {
+          choices?: Array<{ delta?: { content?: unknown } }>;
+        };
+        const delta = chunk.choices?.[0]?.delta?.content;
+        if (typeof delta === 'string' && delta) yield delta;
+      } catch {
+        /* partial JSON line — wait for more bytes */
+      }
+    }
+  }
+}
+
+/**
+ * Streaming pipeline — yields reply text deltas as they arrive.
+ * Provider chain: Hugging Face (SSE) → Z.AI direct (SSE) → SDK
+ * (non-streaming, re-chunked so the UI still builds up live).
+ */
+export async function* streamKimiPipeline(
+  history: KimiHistoryItem[],
+  options: { model?: string; maxTokens?: number; persona?: string } = {}
+): AsyncGenerator<string, void, unknown> {
+  const messages = normalizeMessages(history, options.persona);
+  const maxTokens = options.maxTokens ?? 2048;
+  const requestedModel = options.model?.trim();
+
+  /* ── Hugging Face (OpenAI-compatible SSE) ─────────────────────────── */
+  const hfToken = process.env.HF_TOKEN;
+  const provider = (process.env.AI_PROVIDER || 'auto').toLowerCase();
+  const useHF =
+    hfToken &&
+    (provider === 'huggingface' || (provider === 'auto' && !zaiDirectConfig()));
+  if (useHF) {
+    const response = await fetch(
+      'https://router.huggingface.co/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${hfToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: requestedModel || process.env.HF_MODEL || 'openai/gpt-oss-120b:fastest',
+          messages,
+          temperature: 0.7,
+          max_tokens: maxTokens,
+          stream: true,
+        }),
+        signal: AbortSignal.timeout(90_000),
+        cache: 'no-store',
+      }
+    );
+    if (response.ok && response.body) {
+      yield* parseSseDeltas(response);
+      return;
+    }
+    /* fall through to Z.AI direct on failure */
+  }
+
+  /* ── Z.AI direct (OpenAI-compatible SSE) ──────────────────────────── */
+  const cfg = zaiDirectConfig();
+  if (cfg) {
+    const response = await fetch(`${cfg.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: zaiDirectHeaders(cfg),
+      body: JSON.stringify({
+        model: requestedModel || 'glm-4.6',
+        messages,
+        temperature: 0.7,
+        max_tokens: maxTokens,
+        stream: true,
+        thinking: { type: 'disabled' },
+      }),
+      signal: AbortSignal.timeout(120_000),
+      cache: 'no-store',
+    });
+    if (response.ok && response.body) {
+      yield* parseSseDeltas(response);
+      return;
+    }
+    if (!process.env.AI_FALLBACK_KIMI || process.env.AI_FALLBACK_KIMI !== 'false') {
+      /* fall through to SDK chunking */
+    } else {
+      throw new Error(`Z.AI direct failed (HTTP ${response.status})`);
+    }
+  }
+
+  /* ── SDK fallback: full completion, re-chunked into visible deltas ── */
+  const content = await runKimiFallback(messages);
+  const chunks = content.match(/\S+\s*|\s+/g) ?? [content];
+  for (const chunk of chunks) {
+    yield chunk;
+    await sleep(12); // typewriter cadence — preview visibly builds up
+  }
+}
+
 /**
  * Uses Hugging Face when HF_TOKEN is configured (unless AI_PROVIDER=kimi).
  * If Hugging Face fails, optionally falls back to KIMI when AI_FALLBACK_KIMI=true.
@@ -107,6 +274,38 @@ export async function runKimiPipeline(
   const allowKimiFallback = process.env.AI_FALLBACK_KIMI !== 'false';
 
   let lastError: unknown;
+
+  /* ── Z.AI direct, non-streaming (serverless-safe) ─────────────────── */
+  const zcfg = zaiDirectConfig();
+  if (zcfg && provider !== 'huggingface') {
+    try {
+      const response = await fetch(`${zcfg.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: zaiDirectHeaders(zcfg),
+        body: JSON.stringify({
+          model: 'glm-4.6',
+          messages,
+          temperature: 0.7,
+          max_tokens: 2048,
+          thinking: { type: 'disabled' },
+        }),
+        signal: AbortSignal.timeout(90_000),
+        cache: 'no-store',
+      });
+      if (response.ok) {
+        const data = (await response.json()) as {
+          choices?: Array<{ message?: { content?: string | null } }>;
+        };
+        const answer = data.choices?.[0]?.message?.content;
+        if (typeof answer === 'string' && answer.trim()) {
+          return { content: answer.trim() };
+        }
+      }
+      lastError = new Error(`Z.AI direct failed (HTTP ${response.status})`);
+    } catch (error) {
+      lastError = error;
+    }
+  }
 
   if (useHF) {
     for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {

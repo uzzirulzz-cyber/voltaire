@@ -1,0 +1,235 @@
+/* model-bots.module.css — faithful port of the uploaded "Model Bots" rail
+ * design: seamless scroll, conic-gradient spinning frame, flame pulse. */
+
+.wrap {
+  width: 100%;
+}
+
+.rail {
+  position: relative;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+}
+
+.track {
+  display: flex;
+  gap: 22px;
+  width: max-content;
+  animation: scroll-rtl 34s linear infinite;
+  padding: 14px 0;
+}
+
+.rail:hover .track {
+  animation-play-state: paused;
+}
+
+@keyframes scroll-rtl {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    animation: none;
+  }
+}
+
+.card {
+  flex: 0 0 auto;
+  width: 116px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  position: relative;
+}
+
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.icon {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
+}
+
+.icon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    #0038ff,
+    #00c2ff,
+    #7cfbff,
+    #00c2ff,
+    #0038ff
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: spin-flame 2.6s linear infinite;
+  filter: drop-shadow(0 0 5px #00c2ff);
+}
+
+.icon::after {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle,
+    rgba(0, 194, 255, 0.85),
+    rgba(0, 194, 255, 0) 70%
+  );
+  filter: blur(9px);
+  z-index: -1;
+  animation: flame-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes spin-flame {
+  to {
+    --angle: 360deg;
+  }
+}
+
+@keyframes flame-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+.card:hover .icon {
+  transform: translateY(-4px);
+}
+
+.card:disabled .icon {
+  filter: saturate(0.55);
+}
+
+.icon svg {
+  width: 36px;
+  height: 36px;
+  display: block;
+}
+
+.iconInner {
+  position: relative;
+  z-index: 1;
+  width: 68px;
+  height: 68px;
+  border-radius: 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tag {
+  font-size: 11px;
+  opacity: 0.62;
+  margin-top: -6px;
+}
+
+/* Selected bot: yellow ring (site accent) + brighter flame */
+.selected .icon::before {
+  animation-duration: 1.6s;
+}
+
+.selected .icon {
+  filter: drop-shadow(0 0 9px rgba(250, 204, 21, 0.55));
+}
+
+.selectedName {
+  color: #facc15;
+}
+
+/* ── live preview caret ─────────────────────────────────────────────── */
+.caret {
+  display: inline-block;
+  width: 8px;
+  height: 15px;
+  margin-left: 2px;
+  vertical-align: -2px;
+  background: #facc15;
+  border-radius: 2px;
+  animation: caret-blink 0.85s steps(2, start) infinite;
+}
+
+@keyframes caret-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret {
+    animation: none;
+  }
+}
+
+/* pipeline node chips */
+.nodeChip {
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.nodeChipActive {
+  color: #facc15;
+  border-color: rgba(250, 204, 21, 0.55);
+  background: rgba(250, 204, 21, 0.08);
+  box-shadow: 0 0 12px rgba(250, 204, 21, 0.25);
+}
