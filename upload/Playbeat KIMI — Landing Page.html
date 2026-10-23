@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Playbeat KIMI — Your ideas, in motion</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+<style>
+:root{
+  --navy-deep:#0a0f1c; --navy-mid:#16213f; --navy-soft:#223256;
+  --silver:#c8cdd6; --silver-lt:#eef1f6;
+  --gold:#e3b23c; --gold-lt:#f3d989;
+  --ink:#f3f5f9;
+  color-scheme: dark;
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+body{
+  margin:0;background:var(--navy-deep);color:var(--ink);
+  font-family:'Inter',system-ui,sans-serif;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  overflow-x:hidden;
+}
+.display{font-family:'Sora',sans-serif;}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--navy-deep);z-index:20;}
+
+.glow{position:absolute;border-radius:50%;filter:blur(90px);opacity:0.35;pointer-events:none;z-index:0;}
+.glow-gold{width:480px;height:480px;background:var(--gold);top:-140px;right:-120px;}
+.glow-silver{width:420px;height:420px;background:var(--silver);top:260px;left:-160px;opacity:0.18;}
+
+.kimi-nav{
+  position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;
+  padding:calc(1rem + env(safe-area-inset-top,0px)) 1.5rem 1rem;
+  background:rgba(10,15,28,0.65);backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(200,205,214,0.12);
+}
+.kimi-brand{display:flex;align-items:center;gap:0.6rem;font-family:'Sora',sans-serif;font-weight:700;}
+.kimi-mark{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--silver));display:flex;align-items:center;justify-content:center;color:var(--navy-deep);font-size:1rem;}
+.nav-links{display:flex;gap:1.6rem;font-size:0.9rem;color:var(--silver);}
+.nav-links a{color:inherit;text-decoration:none;}
+.nav-links a:hover{color:var(--gold-lt);}
+.btn-gold{
+  background:linear-gradient(135deg,var(--gold),var(--gold-lt));color:var(--navy-deep);
+  border:0;border-radius:10px;padding:0.55rem 1.3rem;font-weight:600;font-size:0.9rem;
+}
+.btn-ghost{
+  background:transparent;border:1px solid rgba(200,205,214,0.35);color:var(--ink);
+  border-radius:10px;padding:0.55rem 1.3rem;font-weight:500;font-size:0.9rem;
+}
+
+.hero{position:relative;z-index:1;max-width:760px;margin:0 auto;text-align:center;padding:5.5rem 1.2rem 2rem;}
+.eyebrow{
+  display:inline-block;font-size:0.78rem;color:var(--gold-lt);
+  border:1px solid rgba(227,178,60,0.4);border-radius:999px;padding:0.3rem 0.9rem;margin-bottom:1.3rem;
+  background:rgba(227,178,60,0.06);
+}
+.hero h1{
+  font-size:clamp(2.2rem,5.4vw,3.6rem);line-height:1.1;font-weight:700;margin-bottom:1.1rem;
+  background:linear-gradient(100deg,var(--silver-lt) 10%,var(--gold-lt) 50%,var(--silver-lt) 90%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero p.lede{color:var(--silver);font-size:1.08rem;max-width:520px;margin:0 auto 1.8rem;}
+.hero-cta{display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap;}
+.trust-row{margin-top:2.6rem;font-size:0.78rem;color:rgba(200,205,214,0.55);}
+.trust-row .names{display:flex;gap:1.6rem;justify-content:center;flex-wrap:wrap;margin-top:0.5rem;font-family:'Sora',sans-serif;font-weight:600;color:rgba(200,205,214,0.75);}
+
+.preview-wrap{position:relative;z-index:1;max-width:900px;margin:1rem auto 4.5rem;padding:0 1.2rem;}
+.preview{
+  border-radius:18px;border:1px solid rgba(200,205,214,0.18);
+  background:linear-gradient(165deg,rgba(22,33,63,0.75),rgba(10,15,28,0.9));
+  padding:1.3rem;box-shadow:0 30px 70px rgba(0,0,0,0.45);
+}
+.preview .composer{
+  background:rgba(200,205,214,0.06);border:1px solid rgba(200,205,214,0.2);border-radius:14px;
+  padding:0.9rem 1.1rem;color:rgba(238,241,246,0.55);font-size:0.95rem;display:flex;align-items:center;justify-content:space-between;
+}
+.preview .send{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-lt));color:var(--navy-deep);display:flex;align-items:center;justify-content:center;font-weight:700;}
+
+.section-head{max-width:620px;margin:0 auto 2.6rem;text-align:center;padding:0 1.2rem;}
+.section-head h2{font-size:clamp(1.6rem,3.4vw,2.2rem);font-weight:700;margin-bottom:0.6rem;}
+.section-head p{color:var(--silver);font-size:0.98rem;margin:0;}
+
+.cap-grid{max-width:1040px;margin:0 auto 5rem;padding:0 1.2rem;}
+.cap-card{
+  background:linear-gradient(165deg,rgba(22,33,63,0.6),rgba(10,15,28,0.75));
+  border:1px solid rgba(200,205,214,0.14);border-radius:16px;padding:1.5rem;height:100%;
+}
+.cap-card .ico{width:42px;height:42px;border-radius:11px;margin-bottom:1rem;background:linear-gradient(135deg,var(--gold),var(--silver));display:flex;align-items:center;justify-content:center;color:var(--navy-deep);font-size:1.1rem;}
+.cap-card h3{font-size:1.05rem;font-weight:600;margin-bottom:0.4rem;}
+.cap-card p{font-size:0.88rem;color:var(--silver);margin:0;}
+
+.quote-band{position:relative;z-index:1;max-width:760px;margin:0 auto 5rem;text-align:center;padding:0 1.2rem;}
+.quote-band blockquote{
+  font-family:'Sora',sans-serif;font-size:clamp(1.3rem,2.8vw,1.8rem);line-height:1.4;font-weight:600;margin:0 0 1rem;
+  color:var(--silver-lt);
+}
+.quote-band cite{font-style:normal;color:var(--gold-lt);font-size:0.9rem;}
+
+.cta-band{
+  max-width:900px;margin:0 auto 5rem;padding:3rem 1.5rem;text-align:center;border-radius:22px;
+  background:linear-gradient(135deg,var(--navy-mid),var(--navy-soft));
+  border:1px solid rgba(227,178,60,0.3);
+}
+.cta-band h2{font-family:'Sora',sans-serif;font-size:clamp(1.5rem,3.2vw,2rem);font-weight:700;margin-bottom:0.8rem;}
+.cta-band p{color:var(--silver);margin-bottom:1.6rem;}
+
+footer{border-top:1px solid rgba(200,205,214,0.12);padding:2.2rem 1.2rem;text-align:center;color:rgba(200,205,214,0.5);font-size:0.82rem;}
+</style>
+</head>
+<body>
+
+<div class="glow glow-gold"></div>
+<div class="glow glow-silver"></div>
+
+<nav class="kimi-nav">
+  <div class="kimi-brand"><span class="kimi-mark">K</span>Playbeat KIMI</div>
+  <div class="nav-links d-none d-md-flex">
+    <a href="#capabilities">Capabilities</a>
+    <a href="#">Pricing</a>
+    <a href="#">Sign in</a>
+  </div>
+  <button class="btn-gold">Start creating</button>
+</nav>
+
+<section class="hero">
+  <span class="eyebrow">Your AI creative co-pilot</span>
+  <h1 class="display">Your next big idea, further and faster</h1>
+  <p class="lede">Playbeat KIMI brings chat, docs, sheets, slides, and design into one quiet space — so the idea in your head becomes the thing in your hand.</p>
+  <div class="hero-cta">
+    <button class="btn-gold">Start creating — free</button>
+    <button class="btn-ghost">See it in action</button>
+  </div>
+  <div class="trust-row">Built by the team behind
+    <div class="names"><span>PlayBeat Digital</span><span>VOLTAIRE</span><span>Lifestyle Atlas</span></div>
+  </div>
+</section>
+
+<div class="preview-wrap">
+  <div class="preview">
+    <div class="composer">
+      <span>Ask anything, or imagine something new…</span>
+      <span class="send">↑</span>
+    </div>
+  </div>
+</div>
+
+<section id="capabilities">
+  <div class="section-head">
+    <h2 class="display">One workspace, every medium</h2>
+    <p>Each tool shares the same context, so nothing gets lost moving between them.</p>
+  </div>
+  <div class="cap-grid row g-3">
+    <div class="col-md-4"><div class="cap-card"><div class="ico">▤</div><h3>Slides</h3><p>From outline to polished deck, narrated for you.</p></div></div>
+    <div class="col-md-4"><div class="cap-card"><div class="ico">▧</div><h3>Docs</h3><p>Write, structure, and refine long-form work in place.</p></div></div>
+    <div class="col-md-4"><div class="cap-card"><div class="ico">⊞</div><h3>Sheets</h3><p>Model, calculate, and chart without leaving the thread.</p></div></div>
+    <div class="col-md-4"><div class="cap-card"><div class="ico">◇</div><h3>Design</h3><p>Mockups and visual explorations you can actually keep.</p></div></div>
+    <div class="col-md-4"><div class="cap-card"><div class="ico">⌕</div><h3>Deep Research</h3><p>Go past the surface with sourced, structured answers.</p></div></div>
+    <div class="col-md-4"><div class="cap-card"><div class="ico">⚒</div><h3>Build</h3><p>Turn a working idea into a working prototype.</p></div></div>
+  </div>
+</section>
+
+<section class="quote-band">
+  <blockquote>"A quiet space to think bigger. A capable partner to go further."</blockquote>
+  <cite>— the idea behind Playbeat KIMI</cite>
+</section>
+
+<section class="cta-band">
+  <h2 class="display">Ready to think bigger?</h2>
+  <p>A little curiosity. Endless possibility.</p>
+  <button class="btn-gold">Start your first conversation</button>
+</section>
+
+<footer>© 2026 Playbeat KIMI, part of PlayBeat Digital. Made for your next big idea.</footer>
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// PlayBeat AI — ported from the original Firestore schema:
+//   conversations/{autoId}               { uid, title, model, messageCount, createdAt, updatedAt }
+//   conversations/{autoId}/messages/{id} { role, content, model?, at }
+// In this environment Firebase Admin SDK / Firestore is replaced by Prisma + SQLite.
+
+model Conversation {
+  id           String    @id @default(cuid())
+  uid          String // device/session owner (client-generated, mirrors Firebase auth uid)
+  title        String    @default("New session")
+  model        String    @default("kimi-playbeat-1")
+  messageCount Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  messages     Message[]
+
+  @@index([uid, updatedAt])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  role           String // "user" | "assistant"
+  content        String
+  model          String?
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+}
