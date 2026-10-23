@@ -348,7 +348,7 @@ export function Studio() {
           <span className="relative mb-5 flex h-14 w-14 items-center justify-center rounded-2xl">
             <span
               aria-hidden="true"
-              className="absolute inset-0 rounded-2xl bg-[conic-gradient(from_0deg,#a78bfa,#f472b6,#fbbf24,#a78bfa)] [animation:ringspin_6s_linear_infinite] blur-[2px]"
+              className="absolute inset-0 rounded-2xl bg-[conic-gradient(from_0deg,#e8edf5,#facc15,#fbbf24,#e8edf5)] [animation:ringspin_6s_linear_infinite] blur-[2px]"
             />
             <span className="absolute inset-[2px] rounded-[14px] bg-void" />
             <Lock className="relative h-5 w-5 text-acc2" />
@@ -382,7 +382,7 @@ export function Studio() {
     if (messages.length === 0 && !sending) {
       return (
         <div className="flex h-full flex-col items-center justify-center px-4 py-8 text-center">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-acc2 to-acc3 font-display text-lg font-extrabold text-void shadow-[0_10px_36px_rgba(244,114,182,0.35)]">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-acc2 to-acc3 font-display text-lg font-extrabold text-void shadow-[0_10px_36px_rgba(250,204,21,0.32)]">
             ◉
           </div>
           <h3 className="font-display text-lg font-bold text-ink">
@@ -483,7 +483,7 @@ export function Studio() {
           <div className="glass overflow-hidden rounded-[24px]">
             {/* header */}
             <div className="flex items-center gap-3 border-b border-white/10 bg-white/3 px-4 py-3 sm:px-5">
-              <span className="heartbeat h-2.5 w-2.5 shrink-0 rounded-full bg-live [box-shadow:0_0_12px_#34d399]" aria-label="online" />
+              <span className="heartbeat h-2.5 w-2.5 shrink-0 rounded-full bg-live [box-shadow:0_0_12px_#fde047]" aria-label="online" />
               <div className="min-w-0">
                 <strong className="block font-display text-[13px] leading-tight text-ink">
                   PlayBeat
@@ -647,7 +647,7 @@ export function Studio() {
                     type="submit"
                     disabled={sending || !input.trim() || !user}
                     aria-label="Send message"
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-void transition-transform [background:linear-gradient(135deg,#f472b6,#fbbf24)] [box-shadow:0_6px_24px_rgba(251,191,36,.3)] hover:scale-106 hover:-rotate-8 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:rotate-0"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-void transition-transform [background:linear-gradient(135deg,#fde047,#facc15)] [box-shadow:0_6px_24px_rgba(250,204,21,.35)] hover:scale-106 hover:-rotate-8 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:rotate-0"
                   >
                     {sending ? (
                       <Loader2 className="h-4.5 w-4.5 animate-spin" />

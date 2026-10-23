@@ -35,8 +35,8 @@ export function ScrollProgress() {
       aria-hidden="true"
       className="fixed top-0 left-0 z-[60] h-[3px] w-0"
       style={{
-        background: "linear-gradient(90deg, #a78bfa, #f472b6, #fbbf24)",
-        boxShadow: "0 0 12px rgba(244,114,182,.8)",
+        background: "linear-gradient(90deg, #e8edf5, #facc15 50%, #f7f9fc)",
+        boxShadow: "0 0 12px rgba(250,204,21,.8)",
       }}
     />
   );

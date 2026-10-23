@@ -56,7 +56,7 @@ export function Closing() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-60px" }}
-          className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-acc1/30 bg-gradient-to-br from-panel via-white/4 to-panel px-6 py-12 text-center [box-shadow:0_40px_90px_rgba(0,0,0,0.45),0_0_60px_rgba(167,139,250,0.12)] sm:py-14"
+          className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-acc1/30 bg-gradient-to-br from-panel via-white/4 to-panel px-6 py-12 text-center [box-shadow:0_40px_90px_rgba(0,0,0,0.45),0_0_60px_rgba(250,204,21,0.1)] sm:py-14"
         >
           <div aria-hidden="true" className="pb-dots pointer-events-none absolute inset-0 opacity-50" />
           <div

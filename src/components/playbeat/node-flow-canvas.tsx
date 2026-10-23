@@ -27,8 +27,8 @@ type GNode = {
 
 type Edge = { a: number; b: number; speed: number; offset: number; hue: string };
 
-const NODE_COLORS = ["#a78bfa", "#f472b6", "#fbbf24", "#34d399"];
-const WIRE_HUES = ["#a78bfa", "#f472b6", "#fbbf24", "#34d399"];
+const NODE_COLORS = ["#e8edf5", "#facc15", "#fbbf24", "#96a0b4"];
+const WIRE_HUES = ["#e8edf5", "#facc15", "#fbbf24", "#96a0b4"];
 
 const NODE_TITLES = [
   "PlayBeat Prompt",
@@ -219,19 +219,19 @@ export function NodeFlowCanvas({ className }: { className?: string }) {
 
         ctx.save();
         if (glow > 0) {
-          ctx.shadowColor = "rgba(244,114,182,0.6)";
+          ctx.shadowColor = "rgba(250,204,21,0.55)";
           ctx.shadowBlur = 26 * glow;
         }
 
         // body
         ctx.beginPath();
         ctx.roundRect(x, y, n.w, n.h, 9);
-        ctx.fillStyle = "rgba(18,21,33,0.82)";
+        ctx.fillStyle = "rgba(16,26,46,0.85)";
         ctx.fill();
         ctx.lineWidth = 1;
         ctx.strokeStyle =
           glow > 0
-            ? `rgba(244,114,182,${0.45 + glow * 0.4})`
+            ? `rgba(250,204,21,${0.45 + glow * 0.4})`
             : "rgba(255,255,255,0.16)";
         ctx.stroke();
 
@@ -244,7 +244,7 @@ export function NodeFlowCanvas({ className }: { className?: string }) {
         ctx.globalAlpha = 1;
 
         // header title
-        ctx.fillStyle = "#0a0a12";
+        ctx.fillStyle = "#0a0f1c";
         ctx.font = `700 8.5px ${displayFont}`;
         ctx.textBaseline = "middle";
         ctx.fillText(n.title, x + 7, y + 8.5, n.w - 14);
@@ -269,7 +269,7 @@ export function NodeFlowCanvas({ className }: { className?: string }) {
           ctx.fill();
           ctx.beginPath();
           ctx.arc(x + 8 + (n.w - 16) * fill, y + 31.5, 3.4, 0, Math.PI * 2);
-          ctx.fillStyle = "#eef1f6";
+          ctx.fillStyle = "#f7f9fc";
           ctx.fill();
         } else {
           // toggle widget
@@ -280,7 +280,7 @@ export function NodeFlowCanvas({ className }: { className?: string }) {
           ctx.fill();
           ctx.beginPath();
           ctx.arc(x + (on ? 25 : 13), y + 30, 4, 0, Math.PI * 2);
-          ctx.fillStyle = on ? "#0a0a12" : "#f4f2ff";
+          ctx.fillStyle = on ? "#0a0f1c" : "#f7f9fc";
           ctx.fill();
           ctx.fillStyle = "rgba(255,255,255,0.18)";
           ctx.beginPath();
@@ -289,7 +289,7 @@ export function NodeFlowCanvas({ className }: { className?: string }) {
         }
 
         // ports
-        ctx.fillStyle = "#0a0a12";
+        ctx.fillStyle = "#0a0f1c";
         ctx.strokeStyle = n.color;
         ctx.lineWidth = 1.4;
         ctx.beginPath();

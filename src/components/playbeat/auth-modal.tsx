@@ -59,7 +59,7 @@ export function AuthModal() {
   return (
     <Dialog open={authOpen} onOpenChange={(o) => (o ? undefined : closeAuth())}>
       <DialogContent
-        className="glass w-[calc(100%-2rem)] max-w-[400px] rounded-3xl border-white/14 bg-[rgba(18,16,30,0.92)] p-0 backdrop-blur-2xl [box-shadow:0_40px_100px_rgba(0,0,0,.7),0_0_60px_rgba(167,139,250,.15)]"
+        className="glass w-[calc(100%-2rem)] max-w-[400px] rounded-3xl border-white/14 bg-[rgba(10,15,28,0.92)] p-0 backdrop-blur-2xl [box-shadow:0_40px_100px_rgba(0,0,0,.7),0_0_60px_rgba(250,204,21,.14)]"
       >
         <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle className="text-center font-display text-lg font-bold text-ink">

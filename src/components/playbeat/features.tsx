@@ -43,7 +43,7 @@ export function Features() {
             transition={{ duration: 0.55, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
             className="glass rounded-[20px] p-7 transition-all duration-300 hover:-translate-y-1.5 hover:border-acc2/40"
           >
-            <span className="mb-3.5 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-acc1 to-acc2 text-void [box-shadow:0_8px_28px_rgba(244,114,182,0.3)]">
+            <span className="mb-3.5 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-acc1 to-acc2 text-void [box-shadow:0_8px_28px_rgba(250,204,21,0.26)]">
               <Icon className="h-5 w-5" strokeWidth={2.2} />
             </span>
             <h3 className="mb-2 font-display text-base font-bold text-ink">{f.title}</h3>

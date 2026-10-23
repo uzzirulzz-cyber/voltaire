@@ -4,8 +4,8 @@ import { useEffect, useRef } from "react";
 
 /**
  * AuroraCanvas — the fixed, full-page living background.
- * Five large radial-gradient orbs (violet / pink / gold / teal / deep
- * violet) drift on independent sine paths with additive blending —
+ * Five large radial-gradient orbs (silver / yellow / amber / steel gray /
+ * deep navy-slate) drift on independent sine paths with additive blending —
  * an aurora that breathes behind the whole site. Renders one static
  * frame under prefers-reduced-motion; pauses on hidden tabs.
  */
@@ -24,11 +24,11 @@ type Orb = {
 };
 
 const ORBS: Orb[] = [
-  { hue: [167, 139, 250], r: 0.42, ux: 0.18, uy: 0.24, ax: 0.1, ay: 0.08, sx: 0.11, sy: 0.08, phase: 0.0, alpha: 0.2 },   // violet
-  { hue: [244, 114, 182], r: 0.36, ux: 0.82, uy: 0.2, ax: 0.09, ay: 0.1, sx: 0.09, sy: 0.12, phase: 1.7, alpha: 0.16 },   // pink
-  { hue: [251, 191, 36], r: 0.26, ux: 0.62, uy: 0.85, ax: 0.12, ay: 0.06, sx: 0.07, sy: 0.1, phase: 3.1, alpha: 0.1 },     // gold
-  { hue: [52, 211, 153], r: 0.22, ux: 0.12, uy: 0.9, ax: 0.08, ay: 0.09, sx: 0.13, sy: 0.07, phase: 4.4, alpha: 0.08 },    // live green
-  { hue: [123, 108, 240], r: 0.5, ux: 0.5, uy: 0.55, ax: 0.07, ay: 0.07, sx: 0.05, sy: 0.06, phase: 2.3, alpha: 0.12 },    // deep violet
+  { hue: [214, 226, 242], r: 0.46, ux: 0.16, uy: 0.22, ax: 0.1, ay: 0.08, sx: 0.11, sy: 0.08, phase: 0.0, alpha: 0.15 },  // silver
+  { hue: [250, 204, 21], r: 0.3, ux: 0.84, uy: 0.2, ax: 0.09, ay: 0.1, sx: 0.09, sy: 0.12, phase: 1.7, alpha: 0.11 },    // yellow
+  { hue: [251, 191, 36], r: 0.24, ux: 0.62, uy: 0.86, ax: 0.12, ay: 0.06, sx: 0.07, sy: 0.1, phase: 3.1, alpha: 0.07 },    // amber
+  { hue: [138, 152, 178], r: 0.34, ux: 0.12, uy: 0.88, ax: 0.08, ay: 0.09, sx: 0.13, sy: 0.07, phase: 4.4, alpha: 0.1 },    // steel gray
+  { hue: [56, 78, 128], r: 0.5, ux: 0.5, uy: 0.55, ax: 0.07, ay: 0.07, sx: 0.05, sy: 0.06, phase: 2.3, alpha: 0.16 },       // deep navy-slate
 ];
 
 export function AuroraCanvas() {

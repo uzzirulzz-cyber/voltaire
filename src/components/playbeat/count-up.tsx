@@ -50,7 +50,7 @@ export function CountUp({ target, suffix = "" }: { target: number; suffix?: stri
   return (
     <strong
       ref={ref}
-      className="font-display text-3xl font-bold text-transparent [background:linear-gradient(90deg,#a78bfa,#f472b6)] [-webkit-background-clip:text] [background-clip:text]"
+      className="font-display text-3xl font-bold text-transparent [background:linear-gradient(90deg,#f7f9fc,#facc15)] [-webkit-background-clip:text] [background-clip:text]"
     >
       {value}
       {suffix}

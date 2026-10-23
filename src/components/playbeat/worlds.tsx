@@ -81,7 +81,7 @@ export function Worlds() {
               delay: (i % 4) * 0.08,
               ease: [0.22, 1, 0.36, 1],
             }}
-            className={`group overflow-hidden rounded-[22px] border border-white/12 bg-white/4 transition-[transform,box-shadow,border-color] duration-400 hover:-translate-y-2.5 hover:-rotate-1 hover:border-acc2/50 hover:shadow-[0_30px_70px_rgba(167,139,250,0.25)] ${w.span}`}
+            className={`group overflow-hidden rounded-[22px] border border-white/12 bg-white/4 transition-[transform,box-shadow,border-color] duration-400 hover:-translate-y-2.5 hover:-rotate-1 hover:border-acc2/50 hover:shadow-[0_30px_70px_rgba(232,237,245,0.22)] ${w.span}`}
           >
             <div className="relative h-[200px] overflow-hidden">
               <Image

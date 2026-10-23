@@ -275,3 +275,25 @@ Work Log:
 
 Stage Summary:
 - PlayBeat Digital regenerated: vivid live-motion frontend, sign-up authentication, VOLTAIRE film hero — live on / for the Preview Panel.
+
+---
+Task ID: 22
+Agent: main (Z.ai Code)
+Task: Re-theme to user's requested palette — gray gradient · navy · yellow · white (replacing violet/pink/gold), incl. harmonizing photo/film assets
+
+Work Log:
+- Surveyed every color usage across 14 files (token usages + hardcoded hex/rgba) before touching anything.
+- globals.css: token remap keeping names — void #0a0f1c (navy deep), panel #111a2e, panel-2 #1b2742, ink #f7f9fc (white), dim #96a0b4 (pure gray), acc1 #facc15 (yellow), acc2 #e8edf5 (silver), acc3 #fbbf24 (amber), live #fde047. shadcn :root/.dark remapped (primary/ring yellow, navy cards/muted). Utilities: grad-text now white→silver→yellow; pb-grad-btn = white→silver-gray gradient button with navy text (the "gray gradient" signature CTA); EQ bars yellow; conic ring silver→yellow→amber; selection/scroll-hover/node-pulse/bounce-dot yellow; pb-grad-btn glow silver.
+- aurora-canvas.tsx: orbs → silver / yellow / amber / steel-gray / deep navy-slate (additive on navy).
+- node-flow-canvas.tsx: NODE_COLORS/WIRE_HUES = silver/yellow/amber/gray; navy body fill #101a2e-ish, header text/ports/knobs navy vs white, execution glow yellow.
+- 10 components de-hardcoded: hero radial glow (yellow core→silver falloff), studio (conic ring, send button #fde047→#facc15 + yellow glow, live dot #fde047), count-up, scroll-progress, marquee (white→silver 42%→yellow), markdown pre bg navy, features/worlds/closing/auth-modal shadows+glows → yellow/silver.
+- favicon.svg: EQ bars silver→yellow on navy; layout themeColor #0a0f1c.
+- ASSET HARMONIZATION — VLM flagged the hero photos/film as pink/violet clashing with the new palette. Wrote scripts/regrade-images.ts (sharp): grayscale → linear(1.18,-16) → tint #ffd478 → mozjpeg q84, applied to all 5 photos in place (originals still recoverable from /upload via optimize-images.ts). VOLTAIRE film regraded with ffmpeg (hue s=0.18 + warm colorbalance, x264 crf23, audio copy) + poster re-extracted. VLM-verified: all assets now warm golden-amber monochrome, zero pink/violet.
+- STALE-CACHE SAGA (root-caused): browser still showed pink after regrade. Layers found & fixed: (1) Next 16 dev image cache lives at .next/dev/cache/images — NOT .next/cache/images (deleted wrong path first); stale webp derivatives had been re-persisted from the pre-restart in-memory LRU by my cache:'reload' fetches (browser Accept: image/webp variant). Fixed by rm -rf .next/dev/cache/images + config-comment nudge → built-in dev-server restart (same mechanism Task 8 used; next.config.ts reverted byte-identical, git clean) → fresh derivatives now golden.
+- Verified: `bun run lint` exit 0 (twice); dev.log full green chain.
+- Agent-browser E2E (session v3, fresh): zero page/console errors. Hero VLM audit 5/5 — deep navy ✓, yellow accents ✓, ALL cards golden-mono zero pink/violet ✓, no overflow ✓, wow 8/10. Auth golden path: signup (director@playbeat.dev) → "Welcome, Palette Director" toast + user chip + studio unlock; chat golden path: "Give me a one-line tagline for a golden-hour rooftop party…" → real LLM replied, session auto-created "2 msgs · less than a minute ago". Studio VLM audit 7/7 (silver-yellow conic ring, bright-yellow send button w/ navy icon, yellow→silver user bubble, readable reply, sessions sidebar, zero pink/violet, coherent navy+yellow+silver). Full-page VLM: zero pink/violet anywhere, footer at very bottom, wow 9/10. Mobile 375×812: scrollW==375 (no overflow), VLM 4/4. Footer: scrolled-to-bottom bottom=812.23==vh (sticks, no gap). Sign-out → studio re-locks (composer disabled). Cleanup: test user + 1 conversation deleted (messages cascaded); DB now 0/0/0.
+
+Stage Summary:
+- Full palette swap to gray gradient · navy · yellow · white across tokens, canvases, 10 components, favicon — plus golden-mono regrade of all 5 photos + the VOLTAIRE film so no pink/violet content fights the theme.
+- Key env discovery documented: Next 16 dev image-optimizer cache = .next/dev/cache/images (webp variants cached per Accept header); purge + config-nudge restart clears it.
+- Site verified end-to-end: lint 0, no console errors, auth + real-LLM chat golden path, mobile, sticky footer. Ready for the Preview Panel.

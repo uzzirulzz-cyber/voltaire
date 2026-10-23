@@ -158,7 +158,7 @@ export function Hero() {
           className="absolute inset-[10%_5%] -z-10 blur-[50px]"
           style={{
             background:
-              "radial-gradient(circle, rgba(244,114,182,.35), rgba(167,139,250,.15) 55%, transparent 75%)",
+              "radial-gradient(circle, rgba(250,204,21,.32), rgba(232,237,245,.14) 55%, transparent 75%)",
           }}
         />
 

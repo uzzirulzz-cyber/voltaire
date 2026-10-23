@@ -68,7 +68,7 @@ export function Markdown({ content }: { content: string }) {
           ),
           hr: () => <hr className="my-3 border-white/12" />,
           pre: ({ children }) => (
-            <pre className="pb-scroll mb-2 max-w-full overflow-x-auto rounded-xl border border-white/10 bg-[#08070f] p-3 text-xs leading-relaxed last:mb-0">
+            <pre className="pb-scroll mb-2 max-w-full overflow-x-auto rounded-xl border border-white/10 bg-[#0b1322] p-3 text-xs leading-relaxed last:mb-0">
               {children}
             </pre>
           ),
